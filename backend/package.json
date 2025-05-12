@@ -1,0 +1,32 @@
+{
+  "name": "portfolio-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Strapi CMS backend for Portfolio website",
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/strapi": "4.16.0",
+    "@strapi/plugin-i18n": "4.16.0",
+    "@strapi/plugin-users-permissions": "4.16.0",
+    "@strapi/plugin-cloud": "4.16.0",
+    "pg": "^8.11.3",
+    "pg-connection-string": "^2.6.2",
+    "ajv": "^8.12.0"
+  },
+  "author": {
+    "name": "Portfolio Administrator"
+  },
+  "strapi": {
+    "uuid": "portfolio-strapi-cms"
+  },
+  "engines": {
+    "node": ">=16.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}

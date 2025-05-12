@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: portfolio-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: portfolio
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+
+  strapi:
+    build:
+      context: ./backend
+    container_name: portfolio-strapi
+    # Volumes: Use only the named volume for persistent uploads
+    volumes:
+      - strapi-uploads:/app/public/uploads
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: portfolio
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "1337:1337"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+    # REMOVED: command: npm run develop (Use Dockerfile CMD)
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: portfolio-frontend
+    environment:
+      NEXT_PUBLIC_STRAPI_API_URL: http://localhost:1337
+    # REMOVED volumes key entirely as no volumes are needed for frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - strapi
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+    # REMOVED: command: npm run dev (Use Dockerfile CMD)
+
+networks:
+  portfolio-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  strapi-uploads:
