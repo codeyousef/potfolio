@@ -38,16 +38,25 @@ if [ -z "$API_TOKEN_SALT" ]; then
   export API_TOKEN_SALT=$(openssl rand -base64 32)
 fi
 
-# Start Strapi in the background
-echo "Starting Strapi backend..."
+# Start Strapi with complete database reset and initialization
+echo "Starting Strapi backend with database reset..."
 cd /app/backend
-npm run start &
+
+# Ensure database exists (with clean slate)
+echo "Checking PostgreSQL connection and database..."
+PGPASSWORD=$DATABASE_PASSWORD psql -h $DATABASE_HOST -U $DATABASE_USERNAME -d postgres -c "DROP DATABASE IF EXISTS $DATABASE_NAME;"
+PGPASSWORD=$DATABASE_PASSWORD psql -h $DATABASE_HOST -U $DATABASE_USERNAME -d postgres -c "CREATE DATABASE $DATABASE_NAME;"
+
+# Run Strapi with complete initialization
+echo "Starting Strapi with clean database..."
+NODE_ENV=production npm run build && NODE_ENV=production npm run start &
 
 # Wait for Strapi to be available
 echo "Waiting for Strapi to be available..."
-sleep 10
+sleep 15
 
 # Start Next.js frontend
 echo "Starting Next.js frontend..."
 cd /app/frontend
-npm run start
+export PATH="$PATH:/app/frontend/node_modules/.bin"
+PORT=3000 npm run start

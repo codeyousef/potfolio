@@ -5,9 +5,9 @@ services:
     image: postgres:14
     container_name: portfolio-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: portfolio
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
@@ -16,28 +16,28 @@ services:
     networks:
       - portfolio-network
 
-  strapi:
-    build:
-      context: .
-    container_name: portfolio-strapi
-    volumes:
-      - strapi-uploads:/app/backend/public/uploads
-    environment:
-      DATABASE_CLIENT: postgres
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: portfolio
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: postgres
-      NODE_ENV: development
-      HOST: 0.0.0.0
-      PORT: 1337
-      APP_KEYS: ${APP_KEYS}
-      API_TOKEN_SALT: ${API_TOKEN_SALT}
-      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
+  directus:
+    image: directus/directus:latest
+    container_name: portfolio-directus
     ports:
-      - "1337:1337"
+      - "8055:8055"
+    environment:
+      KEY: ${DIRECTUS_KEY:-your-strong-random-key}
+      SECRET: ${DIRECTUS_SECRET:-your-super-strong-random-secret}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-Password123!}
+
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-portfolio}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
+    volumes:
+      - directus-uploads:/directus/uploads
+      - directus-data:/directus/data
     depends_on:
       - postgres
     restart: unless-stopped
@@ -47,13 +47,15 @@ services:
   frontend:
     build:
       context: .
+      dockerfile: Dockerfile
+      target: frontend-runner
     container_name: portfolio-frontend
     environment:
-      NEXT_PUBLIC_STRAPI_API_URL: http://localhost:1337
+      NEXT_PUBLIC_API_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
     ports:
       - "3000:3000"
     depends_on:
-      - strapi
+      - directus
     restart: unless-stopped
     networks:
       - portfolio-network
@@ -64,4 +66,5 @@ networks:
 
 volumes:
   postgres-data:
-  strapi-uploads:
+  directus-uploads:
+  directus-data:

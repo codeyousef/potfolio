@@ -1,98 +1,61 @@
-# Multi-stage build for optimized production
+# ---- Base Stages ----
+FROM node:20-alpine AS node-base
+WORKDIR /app
+# Minimal packages for node-base, curl can be removed if not strictly needed by frontend runtime
+# RUN apk add --no-cache curl 
 
-# ---- Base Bun Image ----
-FROM oven/bun:1 AS base
+FROM oven/bun:1-alpine AS bun-base
 WORKDIR /app
 
-# ---- Dependencies ----
-FROM base AS deps
-
-# Frontend dependencies
+# ---- Frontend Dependencies ----
+FROM bun-base AS frontend-deps
 WORKDIR /app/frontend
-COPY frontend/package.json .
-RUN if [ ! -f package.json ]; then echo "ERROR: Frontend package.json not found in /app/frontend after COPY!"; exit 1; fi
-RUN bun install
-RUN if [ ! -f bun.lockb ]; then echo "ERROR: Frontend bun.lockb not found in /app/frontend after bun install!"; ls -la; exit 1; else echo "Frontend bun.lockb found in /app/frontend."; fi
-RUN echo "--- Contents of /app/frontend in deps stage after bun install: ---" && ls -la
+COPY frontend/package.json ./ 
+# Ensure bun.lockb is copied if that's the lockfile name, or bun.lock* for flexibility
+RUN bun install # Use --frozen-lockfile for reproducible builds
 
-# Backend dependencies
-WORKDIR /app/backend
-COPY backend/package.json .
-RUN if [ ! -f package.json ]; then echo "ERROR: Backend package.json not found in /app/backend after COPY!"; exit 1; fi
-RUN bun install
-RUN if [ ! -f bun.lockb ]; then echo "ERROR: Backend bun.lockb not found in /app/backend after bun install!"; ls -la; exit 1; else echo "Backend bun.lockb found in /app/backend."; fi
-RUN echo "--- Contents of /app/backend in deps stage after bun install: ---" && ls -la
-
-# For debugging: List the full /app directory in deps stage at the end
-WORKDIR /app
-RUN echo "--- Full contents of /app in deps stage: ---" && ls -R /app
-
-# ---- Backend Build (Strapi) ----
-FROM base AS backend-builder
-WORKDIR /app/backend
-# Copy node_modules and bun.lockb (generated in deps stage) from deps stage
-COPY --from=deps /app/backend/node_modules ./node_modules
-COPY --from=deps /app/backend/bun.lockb ./
-COPY backend/ .
-# Set environment variables for backend build if necessary (e.g., for plugins)
-# ENV NODE_ENV=production # Strapi typically builds for production by default
+# ---- Frontend Builder ----
+FROM bun-base AS frontend-builder
+# Changed base to bun-base for consistency if bun is used for build
+WORKDIR /app/frontend
+COPY frontend/ . 
+COPY --from=frontend-deps /app/frontend/node_modules ./node_modules
 RUN bun run build
 
-# ---- Frontend Build (Next.js) ----
-FROM base AS frontend-builder
-WORKDIR /app/frontend
-# Copy node_modules and bun.lockb (generated in deps stage) from deps stage
-COPY --from=deps /app/frontend/node_modules ./node_modules
-COPY --from=deps /app/frontend/bun.lockb ./
-COPY frontend/ .
-# Set environment variables for frontend build
-ENV NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-ENV NODE_ENV=production
-RUN bun run build
-
-# ---- Production Runner ----
-FROM oven/bun:1-alpine AS runner
+# ---- Frontend Runner Stage ----
+FROM node-base AS frontend-runner
 WORKDIR /app
 
-# Install PostgreSQL client for Alpine, and curl if needed by start script
-RUN apk add --no-cache postgresql-client curl
-
-# Create a non-root user for security
+# Create a non-root user for production
 RUN addgroup --system --gid 1001 appgroup && \
     adduser --system --uid 1001 appuser && \
     adduser appuser appgroup
 
-# Copy built Strapi backend
-COPY --from=backend-builder --chown=appuser:appgroup /app/backend/dist ./backend/dist
-COPY --from=backend-builder --chown=appuser:appgroup /app/backend/package.json ./backend/package.json
-COPY --from=backend-builder --chown=appuser:appgroup /app/backend/bun.lockb ./backend/bun.lockb
-COPY --from=backend-builder --chown=appuser:appgroup /app/backend/node_modules ./backend/node_modules
-# If Strapi has a specific production start command in package.json, ensure it's used.
-# COPY --from=backend-builder /app/backend/config ./backend/config # If you have separate config files
-COPY --from=backend-builder --chown=appuser:appgroup /app/backend/.env.example ./backend/.env.example # Or copy .env if not sensitive
+# Set environment to production for Next.js
+ENV NODE_ENV=production
 
-# Copy Next.js standalone build output
-COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/.next/standalone ./frontend/
-COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/.next/static ./frontend/.next/static
+# Copy Next.js build artifacts from frontend-builder
+COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/.next ./frontend/.next
 COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/public ./frontend/public
+COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/package.json ./frontend/package.json
 
-# Copy start script
-COPY ./start-services.sh /app/start-services.sh
-RUN chmod +x /app/start-services.sh
+# Install production dependencies using npm (as Next.js typically runs with Node)
+# Alternatively, if your start script uses bun, you might copy node_modules from frontend-builder
+# or run bun install --production here. For now, assuming npm for 'next start'.
+USER root
+RUN cd ./frontend && npm install --omit=dev
+
+# Change ownership of the frontend directory to appuser after npm install
+RUN chown -R appuser:appgroup ./frontend
 
 USER appuser
+WORKDIR /app/frontend
 
-# Expose ports - 3000 for Next.js and 1337 for Strapi
 EXPOSE 3000
-EXPOSE 1337
-# EXPOSE 5432 # This is for Postgres, not the app container
 
-# Set environment variables for Strapi (can also be set in docker-compose.yml)
-ENV HOST=0.0.0.0
-ENV PORT=1337
-ENV NODE_ENV=production
-# For Next.js, PORT is usually 3000 by default if run via `node server.js` in standalone
-ENV NEXT_PORT=3000
+# HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 CMD curl -f http://localhost:3000/api/health || exit 1
+# Add a healthcheck if your Next.js app has a health endpoint e.g. /api/health
 
-# Start both services using the script
-CMD ["/app/start-services.sh"]
+# Start Next.js application
+# Ensure your package.json has a "start": "next start" script
+CMD ["npm", "run", "start"]

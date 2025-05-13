@@ -2,18 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300&family=Montserrat:wght@200;300;400&family=Roboto+Mono:wght@400&display=swap');
+
 :root {
   --bg-color: #070707;
   --text-color: #A0A0A0;
   --highlight-color: #FFFFFF;
-  --primary-accent: #3B82F6;
+  --primary-accent: #2563EB;
   --secondary-accent: #50E3C2;
+
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+  --font-roboto-mono: 'Roboto Mono', monospace;
 }
 
 html,
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
+  font-family: var(--font-inter);
   height: 100%;
   overflow-x: hidden;
 }

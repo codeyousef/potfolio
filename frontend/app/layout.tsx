@@ -32,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${montserrat.variable} ${robotoMono.variable}`}>
-      <body className="bg-black text-gray-100">
+      <body>
         {children}
       </body>
     </html>
