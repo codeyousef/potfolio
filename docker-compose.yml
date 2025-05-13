@@ -18,11 +18,10 @@ services:
 
   strapi:
     build:
-      context: ./backend
+      context: .
     container_name: portfolio-strapi
-    # Volumes: Use only the named volume for persistent uploads
     volumes:
-      - strapi-uploads:/app/public/uploads
+      - strapi-uploads:/app/backend/public/uploads
     environment:
       DATABASE_CLIENT: postgres
       DATABASE_HOST: postgres
@@ -44,15 +43,13 @@ services:
     restart: unless-stopped
     networks:
       - portfolio-network
-    # REMOVED: command: npm run develop (Use Dockerfile CMD)
 
   frontend:
     build:
-      context: ./frontend
+      context: .
     container_name: portfolio-frontend
     environment:
       NEXT_PUBLIC_STRAPI_API_URL: http://localhost:1337
-    # REMOVED volumes key entirely as no volumes are needed for frontend
     ports:
       - "3000:3000"
     depends_on:
@@ -60,7 +57,6 @@ services:
     restart: unless-stopped
     networks:
       - portfolio-network
-    # REMOVED: command: npm run dev (Use Dockerfile CMD)
 
 networks:
   portfolio-network:
