@@ -1,188 +1,148 @@
-## Aethelframe Protocol (Emergence Theme): Design Specification
+# Aethelframe Protocol: Emergence - Implementation Plan with Conversion Optimization (Next.js & Directus)
 
-**Version:** 1.1 (Incorporating "Emergence" Theme) **Date:** May 12, 2025 **Objective:** To provide a comprehensive design specification for an AI agent to replicate the "Aethelframe Protocol" interactive portfolio website. This version integrates the "Emergence" theme – a subtle narrative of overcoming personal challenges and achieving positive transformation – into the dominant Art/High Fashion aesthetic with subtle Cyberpunk and Old Money influences. The goal remains an exclusive, sophisticated, avant-garde, and immersive digital experience that functions like a kinetic art installation or a curated digital exhibition, now with an added layer of emotional resonance.
+**Objective:** Implement "Aethelframe Protocol" portfolio per updated `docs/Portfolio.md`, focusing on "Emergence" narrative with conversion optimization.
+**Guiding Design Document:** `docs/Portfolio.md` (Version 1.2)
+**Tech Stack:**
+*   Frontend: Next.js (TypeScript), React, Tailwind CSS, Framer Motion, Bun
+*   Backend: Directus, Bun
+*   Database: PostgreSQL
+*   Environment: Docker
 
-**Referential Mockup:** `aethelframe_mockup_v2_novel` (HTML/CSS/JS) serves as a visual and interactive starting point. The "Emergence" theme will primarily influence atmospheric elements, transitions, and subtle visual cues within this framework.
+---
 
-### 0. Overarching Narrative: "Emergence"
+## Phase 0: Project & Environment Setup
 
-The user's journey through the portfolio will subtly mirror a path of emergence from introspection towards clarity, light, and confident creation. This is not to be explicitly stated but _felt_ through the design's evolution.
+*   **Task 0.1:** Verify Docker setup (`Dockerfile`, `docker-compose.yml`, `start-services.sh`).
+*   **Task 0.2:** Configure Tailwind CSS (`frontend/tailwind.config.ts`): theme values (colors, fonts from `Portfolio.md`), custom utility classes for conversion elements.
+*   **Task 0.3:** Global styles (`frontend/app/globals.css`): font imports, base body styles, SVG noise/grain effect, conversion element base styles.
+*   **Task 0.4:** Main Next.js layout (`frontend/app/layout.tsx`): metadata, fonts, global styles wrapper.
+*   **Task 0.5:** Simple analytics setup - add Vercel Analytics, Plausible, or similar lightweight solution to track conversion paths.
+*   **Task 0.6 (Optional):** Basic Directus collections (e.g., "Projects") for parallel backend work.
 
-- **Phase 1: The Seed / The Veil (Initial Entry - "The Overture")**
-    
-    - **Concept:** Introspection, contained potential, the quiet before growth.
-        
-    - **Aethelframe Interpretation:** The "Monolith Entry" will embody this. Darker, more subdued tones, slower animations, a sense of focused stillness. The single interactive prompt is the "seed" of interaction.
-        
-- **Phase 2: The Growth / The Unfurling (Transitions & Initial Canvases)**
-    
-    - **Concept:** The process of breaking through, effort, gradual illumination, and expansion.
-        
-    - **Aethelframe Interpretation:** This will be most evident in the transition from the "Overture" to the main site shell, and in the initial transitions between "Kinetic Canvases." Animations will feel like layers peeling back, spaces opening up, or light gradually increasing. Early canvases (e.g., Home, perhaps an "About/Journey" if explicitly added) might still retain some of the introspective mood before fully transitioning.
-        
-- **Phase 3: The Bloom / The Horizon (Main Portfolio Showcase & Forward-Looking Canvases)**
-    
-    - **Concept:** Clarity, light, openness, confident creation, achievement, looking forward.
-        
-    - **Aethelframe Interpretation:** The main "Kinetic Canvases" (Portfolio/Atelier, Services, Journal, Contact) will embody this. The aesthetic here is bright (within the dark theme context), spacious, and confident. Interactions are polished and assured.
-        
+---
 
-### 1. Core Concept & Philosophy (Aethelframe Revisited with Emergence)
+## Phase 1: The Overture (Seed/Veil) - Frontend with Skip Option
 
-The "Aethelframe Protocol" remains an interactive digital statement. The "Emergence" theme adds an undercurrent of personal resilience and growth to its high-art, high-tech persona.
+*   **Task 1.1:** `Overture` React component (`frontend/components/sections/Overture.tsx`): JSX for "Monolith Entry," title, `[ BEGIN ]` prompt.
+*   **Task 1.2:** Style `Overture` with Tailwind: colors, typography (Montserrat for title, Roboto Mono for prompt), title animation, prompt hover/focus effects (glow, expansion).
+*   **Task 1.3:** `Overture` client-side logic: manage visibility state, handle `[ BEGIN ]` click for site shell transition.
+*   **Task 1.4:** **NEW** Add "Skip Overture" option that appears after 3-second delay, styled to match the aesthetic (subtle opacity animation). Implement localStorage to remember returning visitors.
+*   **Task 1.5:** **NEW** Enhance `[ BEGIN ]` prompt with subtle pulse animation to improve engagement without compromising aesthetics.
 
-- **Dominant Theme:** Art / High Fashion, now infused with a sense of hopeful transformation.
-    
-- **Subtle Influences:**
-    
-    - **Cyberpunk:** Precision, ethereal shimmers (now perhaps symbolizing sparks of insight or new energy), hidden details.
-        
-    - **Old Money:** Timeless quality, impeccable structure, quiet confidence (now reflecting inner strength).
-        
-- **Overall Mood:** Exclusive, sophisticated, avant-garde, immersive, kinetic, **ethereal, contemplative, and ultimately, hopefully radiant.**
-    
+---
 
-### 2. Overall Aesthetic Direction (Infused with Emergence)
+## Phase 2: The Unfurling (Transitions & Initial Site Structure) - Frontend with Wayfinding
 
-The aesthetic of "Controlled Innovation" and "Immersive Dimensionality" is maintained. The "Emergence" narrative will guide the progression of light, space, and energy throughout the experience.
+*   **Task 2.1:** `SiteShell` component (`frontend/components/core/SiteShell.tsx`): manages "Kinetic Canvases" display. Integrate with `Overture` in `frontend/app/page.tsx`.
+*   **Task 2.2:** `CuratorLensNav` component (`frontend/components/navigation/CuratorLensNav.tsx`): JSX for navigator icon & menu. Style with Tailwind (bottom-left, icon, menu hidden initially).
+*   **Task 2.3:** Overture to Site Shell Transition: Use Framer Motion for "breakthrough" animation with embedded value proposition text that emerges organically.
+*   **Task 2.4:** `CuratorLensNav` Logic: Toggle menu (icon animation '+' to 'X'), Framer Motion for staggered menu item appearance. Menu items trigger active canvas change. Icon pulse/shimmer.
+*   **Task 2.5:** **NEW** Add `PositionIndicator` component to show current location in the experience, styled as minimal aesthetic element.
+*   **Task 2.6:** **NEW** `ContactBeacon` component that persists across the experience, styled to match design language. Implement with useContext to control visibility based on current phase.
 
-- **Minimalism:** Remains key, but the "emptiness" can feel more like contemplative space in early phases, and expansive freedom in later phases.
-    
-- **Kinetic Art:** Interactions and transitions are even more critical, now also serving to advance the "Emergence" narrative.
-    
-- **Abstract & Ethereal:** Visuals will strongly support the current phase of "Emergence."
-    
+---
 
-### 3. Visual Language (Adjusted for Emergence Narrative)
+## Phase 3: Kinetic Canvases & Core Content - Frontend with Conversion Elements
 
-- **Color Palette (Refer to CSS Variables in Mockup `aethelframe_mockup_v2_novel`):**
-    
-    - **Phase 1 (Overture):** Dominated by `--bg-color` (#070707) and even deeper blacks. `--text-color` (#A0A0A0) is used. The `--secondary-accent` (#50E3C2 - Minty Teal) acts as the single, small point of ethereal light or the "seed" of hope. `--primary-accent` (Blue) is absent or extremely minimal.
-        
-    - **Phase 2 (Unfurling/Transitions):** Gradual introduction of more light. Backgrounds might subtly lighten or reveal more complex textures. The `--secondary-accent` can become slightly more active. The `--primary-accent` (Blue) might start to appear in very fine lines or subtle highlights, symbolizing emerging clarity.
-        
-    - **Phase 3 (Bloom/Canvases):** The established palette is used with confidence. `--highlight-color` (#FFFFFF) provides sharp contrast. `--primary-accent` (Blue) is used precisely for active states and key details, signifying clarity and strength. `--secondary-accent` (Teal) offers sophisticated, energetic highlights.
-        
-- **Typography (Refer to CSS Variables & Font Imports in Mockup):**
-    
-    - **Phase 1 (Overture):** `Montserrat` for the main title ("AETHELFRAME") is very light (weight 200), with extremely wide letter spacing, feeling almost like an ancient inscription or a distant constellation. The `Roboto Mono` prompt `[ BEGIN ]` is small, delicate.
-        
-    - **Phase 2 (Unfurling/Transitions):** As content unfurls, `Inter` (weight 200-300) is introduced for subtitles or introductory text, still with generous leading and a sense of space. Headings in `Montserrat` might gain slightly more presence (weight 300).
-        
-    - **Phase 3 (Bloom/Canvases):** `Montserrat` (weights 200-400) for titles is confident and artistic. `Inter` (weights 200-300) for body text is clear, airy, and legible. `Roboto Mono` remains extremely sparse for tiny metadata, now feeling like precise, confident annotations.
-        
-- **Iconography:** The "Curator's Lens" navigator icon (cross/plus) can have a subtle pulse or shimmer that intensifies slightly as the user progresses through phases, or its `--primary-accent` color could become more saturated.
-    
-- **Imagery Style:**
-    
-    - **Phase 1:** Highly abstract, dark, perhaps a single point of light or a veiled texture.
-        
-    - **Phase 2:** Abstract imagery suggesting growth, lines converging, light breaking through.
-        
-    - **Phase 3:** Project visuals are clear, confident, and presented as art pieces. The `mix-blend-mode: luminosity;` effect on portfolio images is particularly fitting, with the hover revealing the "true colors" – a metaphor for clarity.
-        
-- **Materiality & Texture (Simulated):**
-    
-    - The SVG noise/grain background can remain consistent, providing a subtle unifying texture.
-        
-    - Surfaces ("Canvases") in Phase 3 can feel more polished or have a subtle inner luminescence compared to more muted surfaces in earlier phases.
-        
+*   **Task 3.1:** Canvas Management: State for active "Kinetic Canvas" (React Context/Zustand/Jotai), updated by `CuratorLensNav`.
+*   **Task 3.2 (Optional):** `KineticCanvasWrapper` component for shared canvas transition logic/styling.
+*   **Task 3.3:** `HomeCanvas` component (`frontend/components/canvases/HomeCanvas.tsx`):
+  * Typographic statement, styled with Tailwind. Calm, spacious atmosphere.
+  * **NEW** Add concise value proposition statement that complements the artistic element.
+  * **NEW** Add primary CTA that feels like a natural part of the composition.
+*   **Task 3.4:** Inter-Canvas Transitions: Framer Motion (`perspective`, `rotateY`, `scale`, `translateZ`). Vary transition styles per "Emergence" theme.
+  * **NEW** Add subtle loading indicators styled as artistic elements.
+  * **NEW** Optimize transitions for reduced waiting time.
+*   **Task 3.5:** `PortfolioCanvas` component (`frontend/components/canvases/PortfolioCanvas.tsx`):
+  * Layout for project items (Tailwind grid/flex). Style items (`mix-blend-mode: luminosity`, hover effects).
+  * **NEW** Add elegant filtering options for projects (styled to match aesthetic).
+  * **NEW** Enhance project cards with clear information and subtle CTAs.
+*   **Task 3.6:** `ProjectDetailCanvas`:
+  * Dynamic route (e.g., `frontend/app/portfolio/[slug]/page.tsx`) or modal. Focused layout for project details.
+  * **NEW** Add "Next Steps" section and "Discuss This Project" CTA.
+  * **NEW** Add related projects component to encourage continued exploration.
+*   **Task 3.7:** `ServicesCanvas`:
+  * Content structure and Tailwind styling for "Confident Expression."
+  * **NEW** Enhance service descriptions for clarity while maintaining aesthetic.
+  * **NEW** Add "Process" insights and service-specific CTAs.
+*   **Task 3.8:** `JournalCanvas`:
+  * Structure and styling for journal entries.
+  * **NEW** Add newsletter signup or content alert option styled to match the aesthetic.
+*   **Task 3.9:** `ContactCanvas`:
+  * **NEW** Streamlined form with minimal required fields.
+  * **NEW** Add subtle "response time" indicator.
+  * **NEW** Include alternative contact methods.
+*   **Task 3.10:** General Phase 3 Styling: Consistent color palette, typography. Microinteractions (hovers, subtle animations). Optional digital dust/particles.
+  * **NEW** Enhanced hover/focus states for conversion elements.
+  * **NEW** Subtle cursor changes near interactive elements.
 
-### 4. Layout Philosophy (Supporting Emergence)
+---
 
-- **"Kinetic Canvases" / "Exhibition Spaces":** The phased approach applies here.
-    
-    - The initial Home canvas (first part of Phase 3, or late Phase 2) might have a more expansive, open feel than the Overture, but still retain a sense of focused calm before the full "Atelier" is revealed.
-        
-- **Portfolio Layout ("The Sculpted Gallery"):** The arrangement of project "sculptures" can feel more densely packed or closer to the "viewer" in the center initially, gradually spreading out or becoming more distinct as if space is expanding. This is a subtle cue.
-    
+## Phase 4: Directus Backend Development with Conversion Tracking
 
-### 5. Navigation System (Reflecting Emergence)
+*   **Task 4.1:** Define Directus Collections: "Projects" (title, desc, images, tech, URL, etc.), "Journal Entries" (title, slug, content, date, image, tags), "Services" (title, desc, icon). Optional "General Site Info."
+*   **Task 4.2:** **NEW** Add "Conversion Actions" collection to track form submissions and engagement.
+*   **Task 4.3:** Configure Directus Roles & Permissions for public access.
+*   **Task 4.4:** Populate Directus with initial sample content for frontend development.
+*   **Task 4.5:** Implement any custom Directus extensions (hooks, endpoints) if needed for complex data queries or logic.
+*   **Task 4.6:** **NEW** Set up Directus Flows for handling form submissions and contact requests.
 
-- **Entry Sequence ("The Overture" - Seed/Veil):**
-    
-    - The "Monolith" concept is perfect for Phase 1. The slow, ethereal animation of "AETHELFRAME" and the delicate `[ BEGIN ]` prompt embody contained potential. The transition out should feel like a significant breakthrough or awakening.
-        
-- **Main Navigation ("The Curator's Lens" - Guiding Light):**
-    
-    - The navigator itself, appearing after the Overture, symbolizes the first clear guide. Its design (bottom-left, minimalist) is maintained.
-        
-    - The staggered animation of menu items appearing can feel like thoughts crystallizing or paths becoming clear.
-        
-- **Canvas Transitions (Unfurling & Blooming):**
-    
-    - The `perspective`, `rotateY`, `scale`, `translateZ` animations are crucial.
-        
-    - Transitions into earlier Phase 3 canvases (like Home) might be slightly slower, more deliberate.
-        
-    - Transitions into the main Portfolio or Services canvases can be smoother, more confident, perhaps with a subtle increase in the speed or complexity of the "peel" or "reveal" effect, suggesting growing confidence.
-        
+---
 
-### 6. Page-Specific Concepts & Novel Features (Infused with Emergence)
+## Phase 5: Frontend-Backend Integration with Conversion Handling
 
-- **Home Canvas (Late Phase 2 / Early Phase 3 - The First Light):**
-    
-    - The typographic statement (e.g., "Intangible Structures.") should feel profound but also hopeful.
-        
-    - The overall atmosphere is calm, spacious, with a sense of dawning clarity.
-        
-- **Portfolio Canvas ("The Atelier" / "The Sculpted Gallery" - Full Bloom):**
-    
-    - The "sculpted" project items are confidently displayed. The act of hovering and revealing more info, or clicking to see details, is like appreciating a fully realized artwork.
-        
-    - The space feels open and inviting to explore.
-        
-- **Project Detail Canvas (Clarity & Focus):**
-    
-    - Immersive and focused, showcasing the work with confidence and precision. The design is clean, allowing the project's details to shine.
-        
-- **Services / Journal / Contact Canvases (Confident Expression):**
-    
-    - These sections present expertise, thoughts, and calls to connect with an assured, open tone. The design is elegant and direct.
-        
+*   **Task 5.1:** Fetch data from Directus API in Next.js components/pages (e.g., using `fetch`, SWR, or React Query with Bun's fetch).
+  *   Portfolio items for `PortfolioCanvas` and `ProjectDetailCanvas`.
+  *   Journal entries for `JournalCanvas`.
+  *   Services content for `ServicesCanvas`.
+*   **Task 5.2:** Implement dynamic routing in Next.js for detailed project/journal views based on slugs from Directus.
+*   **Task 5.3:** Handle image rendering from Directus (using Next.js `<Image>` component if possible, ensuring correct Directus asset URLs).
+*   **Task 5.4:** Set up contact form submission (if `ContactCanvas` has a form) to a Directus endpoint/flow or a third-party service.
+*   **Task 5.5:** **NEW** Implement form validation with elegant error states that match the design language.
+*   **Task 5.6:** **NEW** Create success/confirmation states for all conversion actions with animations that fit the "Emergence" narrative.
 
-### 7. Interaction Design (Reflecting the Journey)
+---
 
-- **Microinteractions:**
-    
-    - **Phase 1:** Interactions are minimal, perhaps a single hover effect on the `[ BEGIN ]` prompt that causes a soft glow or subtle expansion.
-        
-    - **Phase 2/3:** Interactions become more responsive but always maintain elegance. Hover effects (illumination, slight displacement, letter-spacing changes) are precise and fluid.
-        
-- **Animations:**
-    
-    - The "digital dust" / particle effects can be very sparse and almost invisible in Phase 1, gradually becoming slightly more visible or having a more energetic (but still subtle) movement in Phase 3, hinting at creative energy.
-        
-    - Easing curves remain critical for the high-fashion feel.
-        
+## Phase 6: Refinements & "Emergence" Theme Implementation with Conversion Path
 
-### 8. Subtle Cyberpunk/Gaming Accents (Nuanced by Emergence)
+*   **Task 6.1:** Implement "Emergence" Narrative Arc details with conversion moments:
+  *   **Phase 1 (Seed/Veil):** Ensure Overture embodies introspection, contained potential. Darker tones, slower animations. Skip option for returning visitors.
+  *   **Phase 2 (Growth/Unfurling):** Transitions show breaking through, gradual illumination. Canvas transitions peel back layers, open spaces. Emerging value proposition during transitions.
+  *   **Phase 3 (Bloom/Horizon):** Main canvases are bright, spacious, confident. Interactions polished. Clear conversion pathways integrated.
+*   **Task 6.2:** Implement Subtle Accents (Cyberpunk, Old Money) as per `Portfolio.md`, ensuring they support the "Emergence" theme.
+*   **Task 6.3:** Animation Control & Variation: Ensure Framer Motion animations dynamically reflect the current "Emergence" phase (e.g., speed, intensity of light/particles).
+*   **Task 6.4:** Light as a Metaphor: Systematically use light (simulated via colors, glows, highlights with Tailwind) to convey the journey.
+*   **Task 6.5:** **NEW** Implement "Contact Beacon" behavior across all phases, ensuring it feels integrated with the design.
+*   **Task 6.6:** **NEW** Add subtle "guided pathways" (thin lines, gentle gradients, or particle concentrations) that intuitively guide users toward conversion elements.
 
-- **Precision:** Now also symbolizes the focused effort and refined skill honed through the journey.
-    
-- **Ethereal Shimmers/Glows:** Can represent moments of insight, hope, or the "light at the end of the tunnel" during earlier phases, and confident energy in later phases.
-    
-- **Hidden Details (Mono Font):** These tiny annotations can feel like personal milestones or markers of progress noted along the journey, now presented with quiet pride.
-    
+---
 
-### 9. Key Technical Considerations for AI Agent
+## Phase 7: Testing, Optimization & Deployment with Conversion Focus
 
-- No major changes to the core tech stack, but the AI needs to interpret instructions for animation speeds, color subtleties, and atmospheric effects according to the "Emergence" phase.
-    
-- **Animation Control:** The AI must be able to vary animation parameters (duration, easing, intensity of effects like particles or glows) based on the conceptual phase of the user's journey or the specific canvas being displayed.
-    
-- **Accessibility:** The "Emergence" theme should not compromise accessibility. If visual cues are very subtle (e.g., faint light changes), ensure they are not the _only_ way information or state is conveyed.
-    
+*   **Task 7.1:** Accessibility Review (WCAG compliance): Color contrasts, keyboard navigation, ARIA attributes. Ensure conversion elements are accessible.
+*   **Task 7.2:** Performance Optimization:
+  * Image optimization (Next.js `<Image>`), code splitting, lazy loading. Bundle size analysis.
+  * **NEW** Implement priority loading for conversion-critical elements.
+  * **NEW** Add skeleton loaders styled to match the aesthetic.
+*   **Task 7.3:** Cross-browser & Responsiveness Testing:
+  * Test on major browsers. Ensure design is responsive or degrades gracefully.
+  * **NEW** Test mobile touch targets for conversion elements.
+  * **NEW** Verify mobile performance of animations and transitions.
+*   **Task 7.4:** **NEW** Conversion Path Testing:
+  * Set up heatmaps to analyze user interaction with conversion elements.
+  * Test form completion rates and adjust if necessary.
+  * Verify analytics tracking of key conversion points.
+*   **Task 7.5:** **NEW** A/B Testing Setup for Conversion Elements:
+  * Implement lightweight framework for testing subtle variations of conversion elements.
+  * Set up tracking for comparison data.
+*   **Task 7.6:** Final Review against updated `Portfolio.md` specifications.
+*   **Task 7.7:** Build final Docker images for production.
+*   **Task 7.8:** Deploy to chosen hosting platform.
 
-### 10. AI Agent Guidance
+---
 
-- **Embody the Narrative Arc:** The AI should understand that the design is not static but evolves subtly as the user interacts. The "Overture" _feels_ different from the "Atelier."
-    
-- **Focus on Subtlety:** The "Emergence" theme is an undercurrent. The primary aesthetic is still Art/High Fashion. Avoid overt or cliché representations of "struggle" or "triumph." The feeling is conveyed through atmosphere, light, space, and motion.
-    
-- **Transitions are Key:** The transitions between the Overture and the main site, and between canvases, are critical storytelling moments for the "Unfurling" phase. They should be beautiful and meaningful.
-    
-- **Light as a Metaphor:** The use and intensity of light (simulated through color, glows, highlights) is a primary tool to convey the journey from "Veil" to "Bloom."
-    
+## Phase 8: Post-Launch Optimization
 
-By integrating the "Emergence" narrative in this way, the "Aethelframe Protocol" portfolio can become an even more unique and resonant experience, speaking not only to the creator's skills but also, subtly, to their personal journey of growth and resilience.
+*   **Task 8.1:** **NEW** Set up monitoring for conversion metrics and user journeys.
+*   **Task 8.2:** **NEW** Plan for iterative improvements based on analytics data.
+*   **Task 8.3:** **NEW** Develop A/B testing schedule for ongoing conversion optimization.

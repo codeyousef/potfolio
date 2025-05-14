@@ -2,14 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300&family=Montserrat:wght@200;300;400&family=Roboto+Mono:wght@400&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300&family=Montserrat:wght@200;300;400&family=Roboto+Mono:wght@400&display=swap'); */
 
 :root {
-  --bg-color: #070707;
-  --text-color: #A0A0A0;
-  --highlight-color: #FFFFFF;
-  --primary-accent: #2563EB;
-  --secondary-accent: #50E3C2;
+  /* Updated base background and text colors are applied directly in html, body */
+  /* Redundant theme colors removed, rely on tailwind.config.ts for these */
+  --highlight-color: #FFFFFF; /* Kept for general purpose highlight if needed */
 
   --font-montserrat: 'Montserrat', sans-serif;
   --font-inter: 'Inter', sans-serif;
@@ -18,9 +16,9 @@
 
 html,
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: var(--font-inter);
+  background-color: #1a1a1a; /* brand-dark-gray from Portfolio.md */
+  color: #f0f0f0; /* brand-off-white from Portfolio.md */
+  font-family: var(--font-inter); /* Uses Inter as defined in --font-inter */
   height: 100%;
   overflow-x: hidden;
 }
@@ -49,4 +47,10 @@ body::before {
   opacity: 0.02;
   pointer-events: none;
   z-index: 1;
+}
+
+@layer utilities {
+  .shadow-custom-subtle {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
 }

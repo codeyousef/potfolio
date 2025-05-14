@@ -5,18 +5,21 @@ import './globals.css';
 const inter = Inter({ 
   subsets: ['latin'],
   variable: '--font-inter',
+  weight: ['300'],
   display: 'swap'
 });
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
   variable: '--font-montserrat',
+  weight: ['300'],
   display: 'swap'
 });
 
 const robotoMono = Roboto_Mono({ 
   subsets: ['latin'],
   variable: '--font-roboto-mono',
+  weight: ['400'],
   display: 'swap'
 });
 

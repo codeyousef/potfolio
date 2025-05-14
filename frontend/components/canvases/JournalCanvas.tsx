@@ -70,10 +70,11 @@ const JournalCanvas: React.FC = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 20, scale: 0.98 },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: { duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] },
     },
   };
@@ -91,7 +92,7 @@ const JournalCanvas: React.FC = () => {
         Field Notes.
       </motion.h1>
       <motion.p
-        className="mb-12 md:mb-16 font-inter text-lg md:text-xl text-text/70 max-w-lg"
+        className="mb-12 md:mb-16 font-inter text-lg md:text-xl text-brand-off-white/70 max-w-lg"
         variants={subtitleVariants}
         initial="hidden"
         animate="visible"
@@ -102,30 +103,30 @@ const JournalCanvas: React.FC = () => {
       <motion.div
         className="w-full max-w-3xl space-y-10 md:space-y-12"
         variants={listVariants}
-        initial="hidden"
+        initial="hidden" 
         animate="visible"
       >
         {mockJournalEntries.map((entry) => (
           <motion.div 
             key={entry.id} 
-            className="flex flex-col items-start text-left p-6 bg-neutral-800/30 rounded-lg shadow-md hover:bg-neutral-800/50 transition-colors duration-300"
+            className="flex flex-col items-start text-left p-6 md:p-8 bg-brand-dark-gray/40 rounded-lg shadow-custom-subtle border border-brand-off-white/10 hover:bg-brand-dark-gray/60 hover:border-primary-accent/20 transition-all duration-300"
             variants={itemVariants}
           >
             <div className="mb-2">
-              <span className="font-inter text-xs text-primary-accent uppercase tracking-wider">{entry.category}</span>
+              <span className="font-inter text-xs text-primary-accent uppercase tracking-wider font-medium">{entry.category}</span>
             </div>
-            <h3 className="font-montserrat font-semibold text-2xl md:text-3xl text-white mb-2">
+            <h3 className="font-montserrat font-semibold text-xl md:text-2xl lg:text-3xl text-brand-off-white mb-2">
               {entry.title}
             </h3>
-            <p className="font-inter text-sm text-gray-400 mb-3">
+            <p className="font-inter text-xs text-brand-off-white/60 mb-4">
               {entry.date}
             </p>
-            <p className="font-inter text-base text-gray-300 leading-relaxed mb-4">
+            <p className="font-inter text-sm md:text-base text-brand-off-white/80 leading-relaxed mb-5">
               {entry.excerpt}
             </p>
             <motion.button
-              className="font-inter text-sm font-medium text-primary-accent hover:text-white border border-primary-accent hover:border-white py-2 px-4 rounded transition-colors duration-300"
-              whileHover={{ scale: 1.05 }}
+              className="font-inter text-sm font-medium text-primary-accent hover:text-brand-off-white border border-primary-accent hover:border-brand-off-white py-2 px-5 rounded-md transition-colors duration-300 self-start"
+              whileHover={{ scale: 1.05, backgroundColor: 'rgba(59, 130, 246, 0.1)' }} // primary-accent with low opacity
               whileTap={{ scale: 0.95 }}
             >
               Read Article

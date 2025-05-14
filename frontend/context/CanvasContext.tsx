@@ -3,17 +3,24 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define the types of canvases available
-export type CanvasId = 'home' | 'atelier' | 'services' | 'journal' | 'contact';
+export type CanvasId = 'home' | 'portfolio' | 'services' | 'journal' | 'contact';
 
 interface CanvasContextType {
-  activeCanvas: CanvasId;
-  setActiveCanvas: (canvasId: CanvasId) => void;
+  activeCanvas: CanvasId | null;
+  setActiveCanvas: (canvasId: CanvasId | null) => void;
 }
 
 const CanvasContext = createContext<CanvasContextType | undefined>(undefined);
 
-export const CanvasProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeCanvas, setActiveCanvas] = useState<CanvasId>('home'); // Default to home canvas
+interface CanvasProviderProps {
+  children: ReactNode;
+  initialActiveCanvas?: CanvasId | null;
+}
+
+export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children, initialActiveCanvas }) => {
+  const [activeCanvas, setActiveCanvas] = useState<CanvasId | null>(
+    initialActiveCanvas === undefined ? 'home' : initialActiveCanvas
+  );
 
   return (
     <CanvasContext.Provider value={{ activeCanvas, setActiveCanvas }}>

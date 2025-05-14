@@ -42,7 +42,7 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
 
   if (!project) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-white">
+      <div className="flex items-center justify-center min-h-screen text-brand-off-white bg-brand-dark-gray">
         <p>Loading project details or project not found...</p>
       </div>
     );
@@ -59,7 +59,7 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background text-text selection:bg-primary-accent selection:text-background"
+      className="min-h-screen bg-brand-dark-gray text-brand-off-white selection:bg-primary-accent selection:text-brand-pure-white"
       initial={{ opacity: 0}}
       animate={{ opacity: 1, transition: { duration: 0.5, ease: 'easeInOut' }}}
       exit={{ opacity: 0, transition: { duration: 0.5, ease: 'easeInOut' }}}
@@ -72,18 +72,18 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-dark-gray via-brand-dark-gray/70 to-transparent" />
         <motion.div 
           className="absolute bottom-0 left-0 p-8 md:p-12 lg:p-16"
           custom={0} variants={sectionVariants} initial="hidden" animate="visible"
         >
-          <Link href="/#atelier" scroll={false} className="font-inter text-sm text-primary-accent hover:underline mb-2 inline-block">
-            &larr; Return to Atelier
+          <Link href="/#portfolio" scroll={false} className="font-inter text-sm text-primary-accent hover:underline mb-2 inline-block">
+            &larr; Return to Portfolio
           </Link>
-          <h1 className="font-montserrat font-bold text-4xl md:text-6xl lg:text-7xl text-white leading-tight tracking-tight">
+          <h1 className="font-montserrat font-bold text-4xl md:text-6xl lg:text-7xl text-brand-off-white leading-tight tracking-tight">
             {project.title}
           </h1>
-          <p className="font-inter text-lg md:text-xl text-gray-300 mt-2">
+          <p className="font-inter text-lg md:text-xl text-brand-off-white/80 mt-2">
             {project.category} / {project.year}
           </p>
         </motion.div>
@@ -91,17 +91,17 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
 
       <main className="max-w-4xl mx-auto p-8 md:p-12 lg:p-16">
         <motion.section custom={1} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
-          <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-white mb-4">Overview</h2>
-          <p className="font-inter text-gray-300 leading-relaxed text-base md:text-lg">
+          <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">Overview</h2>
+          <p className="font-inter text-brand-off-white/90 leading-relaxed text-base md:text-lg">
             {project.description || 'Detailed description coming soon.'}
           </p>
         </motion.section>
 
         {project.longDescription && (
           <motion.section custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
-            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-white mb-4">The Story</h2>
+            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">The Story</h2>
             {project.longDescription.map((paragraph, index) => (
-              <p key={index} className="font-inter text-gray-300 leading-relaxed text-base md:text-lg mb-4">
+              <p key={index} className="font-inter text-brand-off-white/90 leading-relaxed text-base md:text-lg mb-4">
                 {paragraph}
               </p>
             ))}
@@ -110,10 +110,10 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
 
         {project.techStack && project.techStack.length > 0 && (
           <motion.section custom={3} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
-            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-white mb-4">Technology Stack</h2>
+            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">Technology Stack</h2>
             <div className="flex flex-wrap gap-2">
               {project.techStack.map(tech => (
-                <span key={tech} className="bg-primary-accent/10 text-primary-accent px-3 py-1 rounded-full text-sm font-inter">
+                <span key={tech} className="bg-primary-accent/10 text-primary-accent px-3 py-1.5 rounded-full text-xs sm:text-sm font-inter font-medium">
                   {tech}
                 </span>
               ))}
@@ -127,7 +127,7 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block font-montserrat text-lg bg-primary-accent text-background px-8 py-3 rounded-md hover:bg-primary-accent/80 transition-colors duration-300"
+                    className="inline-block font-montserrat text-lg bg-primary-accent text-brand-pure-white px-8 py-3 rounded-md hover:bg-primary-accent/80 transition-colors duration-300 shadow-md hover:shadow-lg"
                 >
                     View Live Project
                 </Link>
@@ -136,11 +136,11 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
 
       </main>
       
-      <footer className="text-center p-8 border-t border-neutral-700 mt-16">
-        <Link href="/#atelier" scroll={false} className="font-inter text-sm text-primary-accent hover:underline">
-            &larr; Back to The Atelier
+      <footer className="text-center p-8 border-t border-brand-off-white/10 mt-16">
+        <Link href="/#portfolio" scroll={false} className="font-inter text-sm text-primary-accent hover:underline">
+            &larr; Back to The Portfolio
         </Link>
-        <p className="text-xs text-neutral-500 mt-2">Aethelframe Protocol &copy; {new Date().getFullYear()}</p>
+        <p className="text-xs text-brand-off-white/50 mt-2">Aethelframe Protocol &copy; {new Date().getFullYear()}</p>
       </footer>
     </motion.div>
   );

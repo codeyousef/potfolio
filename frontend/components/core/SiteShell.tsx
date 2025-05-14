@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CuratorLensNav from '../navigation/CuratorLensNav';
 import { CanvasProvider, useCanvas } from '../../context/CanvasContext';
 import HomeCanvas from '../canvases/HomeCanvas';
-import AtelierCanvas from '../canvases/AtelierCanvas';
+import PortfolioCanvas from '../canvases/PortfolioCanvas';
 import ServicesCanvas from '../canvases/ServicesCanvas';
 import JournalCanvas from '../canvases/JournalCanvas';
 import ContactCanvas from '../canvases/ContactCanvas';
@@ -45,7 +45,7 @@ const SiteContent: React.FC = () => {
 
   return (
     <motion.div
-      className="relative flex flex-col items-center justify-center min-h-screen w-full bg-background text-text pt-20 pb-32"
+      className="relative flex flex-col items-center justify-center min-h-screen w-full bg-brand-dark-gray text-brand-off-white pt-20 pb-32"
       style={{ perspective: '1200px' }} // Added perspective for 3D transitions
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { duration: 1.5, ease: 'easeInOut' } }}
@@ -64,16 +64,16 @@ const SiteContent: React.FC = () => {
             <HomeCanvas />
           </motion.div>
         )}
-        {activeCanvas === 'atelier' && (
+        {activeCanvas === 'portfolio' && (
           <motion.div
-            key="atelier-canvas"
+            key="portfolio-canvas"
             variants={canvasTransitionVariants}
             initial="initial"
             animate="animate"
             exit="exit"
             className="absolute inset-0 w-full h-full"
           >
-            <AtelierCanvas />
+            <PortfolioCanvas />
           </motion.div>
         )}
         {activeCanvas === 'services' && (

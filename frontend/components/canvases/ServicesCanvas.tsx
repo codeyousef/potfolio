@@ -43,10 +43,11 @@ const ServicesCanvas: React.FC = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
         duration: 0.6,
         ease: [0.43, 0.13, 0.23, 0.96],
@@ -64,11 +65,11 @@ const ServicesCanvas: React.FC = () => {
         initial="hidden"
         animate="visible"
       >
-        Capabilities.
+        Services Spectrum.
       </motion.h1>
       
       <motion.div
-        className="w-full max-w-3xl space-y-10 md:space-y-12"
+        className="w-full max-w-4xl space-y-8 md:space-y-10"
         variants={listVariants}
         initial="hidden"
         animate="visible"
@@ -76,14 +77,14 @@ const ServicesCanvas: React.FC = () => {
         {mockServices.map((service) => (
           <motion.div 
             key={service.id} 
-            className="flex flex-col items-center text-center"
+            className="bg-brand-dark-gray/30 p-6 md:p-8 rounded-lg shadow-custom-subtle border border-brand-off-white/10 flex flex-col items-center text-center"
             variants={itemVariants}
           >
-            <span className="text-4xl md:text-5xl mb-3 md:mb-4" role="img" aria-label={`${service.title} icon`}>{service.icon}</span>
-            <h3 className="font-montserrat font-semibold text-2xl md:text-3xl text-white mb-2">
+            <span className="text-4xl md:text-5xl mb-4 md:mb-5" role="img" aria-label={`${service.title} icon`}>{service.icon}</span>
+            <h3 className="font-montserrat font-semibold text-xl md:text-2xl text-brand-off-white mb-3">
               {service.title}
             </h3>
-            <p className="font-inter text-base md:text-lg text-gray-300 leading-relaxed max-w-xl">
+            <p className="font-inter text-sm md:text-base text-brand-off-white/80 leading-relaxed max-w-md">
               {service.description}
             </p>
           </motion.div>

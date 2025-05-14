@@ -12,8 +12,8 @@ interface ContactLink {
 
 const contactLinks: ContactLink[] = [
   { id: 'email', name: 'Email', href: 'mailto:hello@aethelframe.com', icon: '✉️' },
-  { id: 'linkedin', name: 'LinkedIn', href: 'https://linkedin.com/in/yourprofile', icon: '🔗' }, // Replace with actual link
-  { id: 'github', name: 'GitHub', href: 'https://github.com/yourprofile', icon: '🐙' }, // Replace with actual link
+  { id: 'linkedin', name: 'LinkedIn', href: 'https://linkedin.com/in/yourprofile', icon: '🔗' }, // TODO: Replace with actual LinkedIn profile URL
+  { id: 'github', name: 'GitHub', href: 'https://github.com/yourprofile', icon: '🐙' }, // TODO: Replace with actual GitHub profile URL
 ];
 
 const ContactCanvas: React.FC = () => {
@@ -25,7 +25,7 @@ const ContactCanvas: React.FC = () => {
       transition: {
         duration: 1.0,
         ease: 'circOut',
-        delay: 0.3, // Adjusted delay
+        delay: 0.3,
       },
     },
   };
@@ -35,7 +35,7 @@ const ContactCanvas: React.FC = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, delay: 0.6 }, // Delay after title
+      transition: { duration: 0.8, delay: 0.6 },
     },
   };
 
@@ -45,23 +45,24 @@ const ContactCanvas: React.FC = () => {
       opacity: 1,
       transition: {
         staggerChildren: 0.2,
-        delayChildren: 0.8, // Delay after subtitle
+        delayChildren: 0.8,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: { duration: 0.7, ease: [0.43, 0.13, 0.23, 0.96] },
     },
   };
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center h-full w-full text-center p-8 pt-16 md:pt-24 overflow-y-auto"
+      className="flex flex-col items-center justify-center h-full w-full text-center p-8 pt-16 md:pt-24 overflow-y-auto select-none"
     >
       <motion.h1
         className="font-montserrat font-bold text-5xl md:text-7xl lg:text-8xl text-secondary-accent leading-tight tracking-tight mb-6 md:mb-8"
@@ -72,7 +73,7 @@ const ContactCanvas: React.FC = () => {
         Connect.
       </motion.h1>
       <motion.p
-        className="mb-10 md:mb-12 font-inter text-lg md:text-xl text-text/80 max-w-md"
+        className="mb-10 md:mb-12 font-inter text-lg md:text-xl text-brand-off-white/80 max-w-md"
         variants={subtitleVariants}
         initial="hidden"
         animate="visible"
@@ -81,7 +82,7 @@ const ContactCanvas: React.FC = () => {
       </motion.p>
 
       <motion.div
-        className="flex flex-col sm:flex-row sm:space-x-8 space-y-6 sm:space-y-0 items-center"
+        className="flex flex-col sm:flex-row sm:space-x-6 items-center space-y-6 sm:space-y-0"
         variants={listVariants}
         initial="hidden"
         animate="visible"
@@ -92,20 +93,19 @@ const ContactCanvas: React.FC = () => {
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-inter text-lg text-primary-accent hover:text-white transition-colors duration-300 flex items-center space-x-2 group"
+            className="font-inter text-base font-medium text-primary-accent hover:text-brand-pure-white border border-primary-accent hover:bg-primary-accent/90 py-3 px-6 rounded-lg transition-all duration-300 flex items-center space-x-2.5 group min-w-[150px] justify-center"
             variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
-            {link.icon && <span className="text-2xl group-hover:scale-110 transition-transform duration-300">{link.icon}</span>}
+            {link.icon && <span className="text-xl group-hover:scale-110 transition-transform duration-300">{link.icon}</span>}
             <span>{link.name}</span>
           </motion.a>
         ))}
       </motion.div>
 
-      {/* Optional: A small note about response times or preferred contact method */}
       <motion.p 
-        className='mt-12 md:mt-16 font-inter text-sm text-text/60'
+        className='mt-16 md:mt-20 font-inter text-sm text-brand-off-white/60'
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { duration: 0.8, delay: 1.2 } }}
       >

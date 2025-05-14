@@ -31,21 +31,21 @@
 ## Phase 2: The Unfurling (Transitions & Initial Site Structure) - Frontend
 
 *   **Task 2.1:** `SiteShell` component (`frontend/components/core/SiteShell.tsx`): manages "Kinetic Canvases" display. Integrate with `Overture` in `frontend/app/page.tsx`.
-*   **Task 2.2:** `CuratorLensNav` component (`frontend/components/navigation/CuratorLensNav.tsx`): JSX for navigator icon & menu. Style with Tailwind (bottom-left, icon, menu hidden initially).
-*   **Task 2.3:** Overture to Site Shell Transition: Use Framer Motion for "breakthrough" animation.
-*   **Task 2.4:** `CuratorLensNav` Logic: Toggle menu (icon animation '+' to 'X'), Framer Motion for staggered menu item appearance. Menu items trigger active canvas change. Icon pulse/shimmer.
+*   **Task 2.2:** `CuratorLensNav` component (`frontend/components/navigation/CuratorLensNav.tsx`): JSX for navigator icon & menu. Style with Tailwind (bottom-left, icon, menu hidden initially). `[COMPLETED - Initial JSX, Styling, and Theming Refined]`
+*   **Task 2.3:** Overture to Site Shell Transition: Use Framer Motion for "breakthrough" animation. `[COMPLETED]`
+*   **Task 2.4:** `CuratorLensNav` Logic: Toggle menu (icon animation '+' to 'X'), Framer Motion for staggered menu item appearance. Menu items trigger active canvas change. Icon pulse/shimmer. `[COMPLETED - Toggle Logic, Animations, Active Canvas Change Refined]`
 
 ---
 
 ## Phase 3: Kinetic Canvases & Core Content - Frontend
 
-*   **Task 3.1:** Canvas Management: State for active "Kinetic Canvas" (React Context/Zustand/Jotai), updated by `CuratorLensNav`.
+*   **Task 3.1:** Canvas Management: State for active "Kinetic Canvas" (React Context/Zustand/Jotai), updated by `CuratorLensNav`. `[COMPLETED - CanvasContext updated for 'portfolio', SiteShell renders PortfolioCanvas]`
 *   **Task 3.2 (Optional):** `KineticCanvasWrapper` component for shared canvas transition logic/styling.
-*   **Task 3.3:** `HomeCanvas` component (`frontend/components/canvases/HomeCanvas.tsx`): Typographic statement, styled with Tailwind. Calm, spacious atmosphere.
-*   **Task 3.4:** Inter-Canvas Transitions: Framer Motion (`perspective`, `rotateY`, `scale`, `translateZ`). Vary transition styles per "Emergence" theme.
-*   **Task 3.5:** `PortfolioCanvas` component (`frontend/components/canvases/PortfolioCanvas.tsx`): Layout for project items (Tailwind grid/flex). Style items (`mix-blend-mode: luminosity`, hover effects).
-*   **Task 3.6:** `ProjectDetailCanvas`: Dynamic route (e.g., `frontend/app/portfolio/[slug]/page.tsx`) or modal. Focused layout for project details.
-*   **Task 3.7:** `ServicesCanvas`, `JournalCanvas`, `ContactCanvas` components: Content structure and Tailwind styling for "Confident Expression."
+*   **Task 3.3:** `HomeCanvas` component (`frontend/components/canvases/HomeCanvas.tsx`): Typographic statement, styled with Tailwind. Calm, spacious atmosphere. `[COMPLETED - Styled with sequential character animation and theme colors]`
+*   **Task 3.4:** Inter-Canvas Transitions: Framer Motion (`perspective`, `rotateY`, `scale`, `translateZ`). Vary transition styles per "Emergence" theme. `[COMPLETED - Foundation in place via SiteShell, advanced thematic variations for Phase 6]`
+*   **Task 3.5:** `PortfolioCanvas` component (`frontend/components/canvases/PortfolioCanvas.tsx`): Layout for project items (Tailwind grid/flex). Style items (`mix-blend-mode: luminosity`, hover effects). `[COMPLETED - Detailed content layout and styling for project items implemented]`
+*   **Task 3.6:** `ProjectDetailCanvas`: Dynamic route (e.g., `frontend/app/portfolio/[slug]/page.tsx`) or modal. Focused layout for project details. `[COMPLETED - Dynamic route and component styled with theme colors]`
+*   **Task 3.7:** `ServicesCanvas`, `JournalCanvas`, `ContactCanvas` components: Content structure and Tailwind styling for "Confident Expression." `[COMPLETED - Components created, styled with theme colors, and integrated into navigation]`
 *   **Task 3.8:** General Phase 3 Styling: Consistent color palette, typography. Microinteractions (hovers, subtle animations). Optional digital dust/particles.
 
 ---
@@ -83,11 +83,20 @@
 
 ---
 
-## Phase 7: Testing, Optimization & Deployment
+## Phase 7: Project Documentation
 
-*   **Task 7.1:** Accessibility Review (WCAG compliance): Color contrasts, keyboard navigation, ARIA attributes.
-*   **Task 7.2:** Performance Optimization: Image optimization (Next.js `<Image>`), code splitting, lazy loading. Bundle size analysis.
-*   **Task 7.3:** Cross-browser & Responsiveness Testing: Test on major browsers. Ensure design is responsive or degrades gracefully.
-*   **Task 7.4:** Final Review against `Portfolio.md` specifications.
-*   **Task 7.5:** Build final Docker images for production.
-*   **Task 7.6:** Deploy to chosen hosting platform.
+*   **Task 7.1:** Update README.md with current project status, setup instructions, and overview.
+*   **Task 7.2:** Document component structure and props, especially for core components like `SiteShell`, `CuratorLensNav`, and Canvases.
+*   **Task 7.3:** Detail Directus setup and any custom configurations if not already covered elsewhere.
+*   **Task 7.4:** Note down key design decisions and rationale for future reference.
+
+---
+
+## Phase 8: Testing, Optimization & Deployment
+
+*   **Task 8.1:** Accessibility Review (WCAG compliance): Color contrasts, keyboard navigation, ARIA attributes.
+*   **Task 8.2:** Performance Optimization: Image optimization (Next.js `<Image>`), code splitting, lazy loading. Bundle size analysis.
+*   **Task 8.3:** Cross-browser & Responsiveness Testing: Test on major browsers. Ensure design is responsive or degrades gracefully.
+*   **Task 8.4:** Final Review against `Portfolio.md` specifications.
+*   **Task 8.5:** Build final Docker images for production.
+*   **Task 8.6:** Deploy to chosen hosting platform.
