@@ -1,118 +1,140 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface OvertureProps {
-  onBegin: () => void; // Callback to signal the beginning of the main experience
+  onBegin: () => void;
 }
 
 const Overture: React.FC<OvertureProps> = ({ onBegin }) => {
+  const [isReturningVisitor, setIsReturningVisitor] = useState(false);
+  const [showSkipButton, setShowSkipButton] = useState(false);
+
   useEffect(() => {
-    console.log('Overture component mounted');
+    // Check if user is a returning visitor
+    const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
+    if (hasVisitedBefore) {
+      setIsReturningVisitor(true);
+    }
+
+    // Show skip button after 3 seconds delay
+    const timer = setTimeout(() => {
+      setShowSkipButton(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
-  
-  const titleVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 3,
-        ease: 'easeInOut',
-        delay: 0.5,
-      },
-    },
+
+  const handleBegin = () => {
+    // Set the flag in localStorage
+    localStorage.setItem('hasVisitedBefore', 'true');
+    onBegin();
   };
 
-  const promptVariants = {
-    initial: {
-      opacity: 0,
-      y: 20,
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      scale: [1, 1.03, 1], // Subtle pulse
-      transition: {
-        delay: 2, // Delay until title is somewhat visible
-        opacity: { duration: 1.5, ease: 'easeInOut' },
-        y: { duration: 1.5, ease: 'easeInOut' },
-        scale: {
-          duration: 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-          delay: 3.5, // Start pulsing a bit after appearing
-        },
-      },
-    },
-    hover: {
-      scale: 1.1,
-      textShadow: '0 0 15px #3b82f6', // Use primary-accent blue for glow
-      color: '#ffffff', // Use brand-pure-white for text on hover
-      transition: {
-        duration: 0.3,
-        ease: 'easeInOut',
-      },
+  // Variants for animations
+  const titleVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 3, ease: 'easeInOut', delay: 0.5 } },
+  };
+
+  const buttonVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        duration: 1, 
+        ease: 'easeOut', 
+        delay: 3.5 
+      } 
     },
   };
 
   const skipButtonVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: 4, // Appears after 4 seconds
-        duration: 1,
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 0.7, 
+      transition: { 
+        duration: 1, 
+        ease: 'easeInOut' 
+      } 
+    },
+  };
+
+  const welcomeBackVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 0.7, 
+      transition: { 
+        duration: 1, 
         ease: 'easeInOut',
-      },
+        delay: 1
+      } 
     },
   };
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center h-screen w-screen bg-brand-dark-gray select-none"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }} // Stays visible until onBegin is called
-      exit={{ opacity: 0, transition: { duration: 1.5, ease: 'easeInOut' } }} // For transitioning out
-      // Fallback inline styles to ensure visibility even if animations don't run
-      style={{ opacity: 1 }}
-    >
+    <>
+      {/* Monolith Entry Visual Element - could be implemented as a subtle background or SVG */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.05 }}
+        transition={{ duration: 2 }}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      >
+        <div className="w-1/3 h-2/3 bg-gradient-to-b from-transparent via-blue-500/10 to-transparent"></div>
+      </motion.div>
+
+      {/* Main Title */}
       <motion.h1
-        className="font-montserrat text-6xl md:text-8xl lg:text-9xl font-light text-brand-off-white tracking-[0.2em] md:tracking-[0.3em] uppercase"
+        className="overture-title" 
         variants={titleVariants}
         initial="hidden"
         animate="visible"
-        // Fallback inline styles to ensure visibility even if animations don't run
-        style={{ opacity: 1 }}
       >
-        Aethelframe
+        AETHELFRAME
       </motion.h1>
+
+      {/* Begin Button */}
       <motion.button
-        className="mt-12 font-roboto-mono text-sm text-brand-off-white tracking-wider py-2 px-4 border border-transparent focus:outline-none"
-        variants={promptVariants}
-        initial="initial"
-        animate="animate"
-        whileHover="hover"
-        onClick={onBegin}
-        // Fallback inline styles to ensure visibility even if animations don't run
-        style={{ opacity: 1, transform: 'none' }}
+        className="overture-begin-button" 
+        onClick={handleBegin}
+        variants={buttonVariants}
+        initial="hidden"
+        animate="visible"
       >
         [ BEGIN ]
       </motion.button>
 
-      <motion.button
-        className="absolute bottom-8 right-8 md:bottom-12 md:right-12 font-roboto-mono text-xs text-brand-off-white/70 hover:text-brand-off-white focus:outline-none transition-colors duration-300"
-        variants={skipButtonVariants}
-        initial="hidden"
-        animate="visible"
-        onClick={onBegin} // Also triggers onBegin
-        // Fallback inline styles to ensure visibility even if animations don't run
-        style={{ opacity: 0.7, transform: 'none' }}
-      >
-        Skip Overture
-      </motion.button>
-    </motion.div>
+      {/* Skip Button - only shows after delay and for returning visitors */}
+      <AnimatePresence>
+        {showSkipButton && (
+          <motion.button
+            className="overture-skip-button" 
+            onClick={handleBegin}
+            variants={skipButtonVariants}
+            initial="hidden"
+            animate="visible"
+            exit={{ opacity: 0 }}
+          >
+            SKIP OVERTURE
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Welcome Back Message - only for returning visitors */}
+      {isReturningVisitor && (
+        <motion.div
+          className="overture-welcome-back" 
+          variants={welcomeBackVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          Welcome back
+        </motion.div>
+      )}
+    </>
   );
 };
 

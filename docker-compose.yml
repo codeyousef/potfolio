@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   postgres:
     image: postgres:14
@@ -48,12 +46,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: frontend-runner
+      target: frontend-dev
     container_name: portfolio-frontend
     environment:
       NEXT_PUBLIC_API_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
+      NODE_ENV: development
+      # For Windows/macOS, if HMR is still flaky, uncomment the next line:
+      WATCHPACK_POLLING: "true"
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+      # - /app/frontend/.next
     depends_on:
       - directus
     restart: unless-stopped

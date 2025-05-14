@@ -60,7 +60,7 @@ export default function HomePage() {
             variants={overtureVariants}
             initial="initial" // Overture starts visible and normal
             exit="exit"
-            className="w-full h-full absolute inset-0" // Ensure it covers the area
+            className="w-full h-full absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] select-none" 
           >
             <Overture onBegin={handleBeginExperience} />
           </motion.div>

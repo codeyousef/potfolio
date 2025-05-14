@@ -9,32 +9,32 @@ import PortfolioCanvas from '../canvases/PortfolioCanvas';
 import ServicesCanvas from '../canvases/ServicesCanvas';
 import JournalCanvas from '../canvases/JournalCanvas';
 import ContactCanvas from '../canvases/ContactCanvas';
+import ParticleBackground from '../ParticleBackground';
 
 const canvasTransitionVariants = {
   initial: {
     opacity: 0,
-    rotateY: 50, // Start rotated
+    rotateY: 50, 
     scale: 0.9,
-    z: -150,     // Pushed back slightly
-    transformOrigin: 'center center',
+    // z: -150, // Original z value, adjust if needed with overture
   },
   animate: {
     opacity: 1,
     rotateY: 0,
     scale: 1,
-    z: 0,
+    // z: 0,
     transition: {
-      duration: 0.8, // Deliberate transition time
-      ease: [0.43, 0.13, 0.23, 0.96], // Smooth easing
+      duration: 0.8,
+      ease: [0.43, 0.13, 0.23, 0.96],
     },
   },
   exit: {
     opacity: 0,
-    rotateY: -50, // Rotate out in the opposite direction
+    rotateY: -50,
     scale: 0.9,
-    z: -150,
+    // z: -150,
     transition: {
-      duration: 0.7, // Slightly faster exit
+      duration: 0.7,
       ease: [0.43, 0.13, 0.23, 0.96],
     },
   },
@@ -43,87 +43,102 @@ const canvasTransitionVariants = {
 const SiteContent: React.FC = () => {
   const { activeCanvas } = useCanvas();
 
+  const canvasWrapperStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    perspective: '1200px',
+  } as React.CSSProperties;
+
   return (
-    <motion.div
-      className="relative flex flex-col items-center justify-center min-h-screen w-full bg-brand-dark-gray text-brand-off-white pt-20 pb-32"
-      style={{ perspective: '1200px' }} // Added perspective for 3D transitions
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1, transition: { duration: 1.5, ease: 'easeInOut' } }}
-      exit={{ opacity: 0, transition: { duration: 1.5, ease: 'easeInOut' } }}
-    >
+    <>
+      <ParticleBackground /> 
       <AnimatePresence mode="wait">
         {activeCanvas === 'home' && (
           <motion.div
-            key="home-canvas" // Essential for AnimatePresence
+            key="home-canvas"
+            className="w-full h-full relative"
             variants={canvasTransitionVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 w-full h-full" // Wrapper to fill space
           >
             <HomeCanvas />
           </motion.div>
         )}
+        
         {activeCanvas === 'portfolio' && (
           <motion.div
             key="portfolio-canvas"
+            className="w-full h-full relative"
             variants={canvasTransitionVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 w-full h-full"
           >
             <PortfolioCanvas />
           </motion.div>
         )}
+        
         {activeCanvas === 'services' && (
           <motion.div
             key="services-canvas"
+            className="w-full h-full relative"
             variants={canvasTransitionVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 w-full h-full"
           >
             <ServicesCanvas />
           </motion.div>
         )}
+        
         {activeCanvas === 'journal' && (
           <motion.div
             key="journal-canvas"
+            className="w-full h-full relative"
             variants={canvasTransitionVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 w-full h-full"
           >
             <JournalCanvas />
           </motion.div>
         )}
+        
         {activeCanvas === 'contact' && (
           <motion.div
             key="contact-canvas"
+            className="w-full h-full relative"
             variants={canvasTransitionVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 w-full h-full"
           >
             <ContactCanvas />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Curator's Lens Navigator is fixed, so it's rendered here but positioned via its own CSS */}
       <CuratorLensNav />
-    </motion.div>
+    </>
   );
 };
 
 const SiteShell: React.FC = () => {
   return (
     <CanvasProvider>
-      <SiteContent />
+      <div 
+        className="fixed inset-0 bg-brand-bg text-brand-text w-full h-full relative"
+        style={{ overflow: 'hidden' }} 
+      >
+        <SiteContent />
+      </div>
     </CanvasProvider>
   );
 };

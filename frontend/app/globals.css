@@ -5,52 +5,87 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300&family=Montserrat:wght@200;300;400&family=Roboto+Mono:wght@400&display=swap'); */
 
 :root {
-  /* Updated base background and text colors are applied directly in html, body */
-  /* Redundant theme colors removed, rely on tailwind.config.ts for these */
-  --highlight-color: #FFFFFF; /* Kept for general purpose highlight if needed */
+  /* Design Tokens from Mockup */
+  --bg-color: #070707; 
+  --text-color: #A0A0A0; 
+  --primary-accent: #0073E6; 
+  --secondary-accent: #50E3C2; 
+  --highlight-color: #FFFFFF; 
 
-  --font-montserrat: 'Montserrat', sans-serif;
-  --font-inter: 'Inter', sans-serif;
-  --font-roboto-mono: 'Roboto Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  --transition-duration-epic: 2s;
+  --transition-duration-slow: 1.5s;
+  --transition-duration-medium: 0.9s;
+  --transition-duration-fast: 0.6s;
+  --easing-curve-display: cubic-bezier(0.83, 0, 0.17, 1);
+  --easing-curve-interactive: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html,
-body {
-  background-color: #1a1a1a; /* brand-dark-gray from Portfolio.md */
-  color: #f0f0f0; /* brand-off-white from Portfolio.md */
-  font-family: var(--font-inter); /* Uses Inter as defined in --font-inter */
+html {
   height: 100%;
-  overflow-x: hidden;
+  overflow-x: hidden; /* Match body's overflow behavior from mockup for html too */
 }
 
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow: hidden; /* As per mockup */
+  font-weight: 200; /* As per mockup */
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Custom Scrollbar from Mockup */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg-color); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 1.5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-accent); }
+
+
+/* Global centering fix - kept from original, review later */
+#__next, main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Font utility classes - kept, but Tailwind theme fonts are preferred */
 .font-montserrat {
-  font-family: var(--font-montserrat);
+  font-family: var(--font-heading);
 }
 
 .font-inter {
-  font-family: var(--font-inter);
+  font-family: var(--font-body);
 }
 
 .font-roboto-mono {
-  font-family: var(--font-roboto-mono);
-}
-
-/* Add some subtle noise texture to the background */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.02;
-  pointer-events: none;
-  z-index: 1;
+  font-family: var(--font-mono);
 }
 
 @layer utilities {
   .shadow-custom-subtle {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.08);
   }
+}
+
+/* Particle Animation from Mockup */
+@keyframes driftAndFade {
+  0%, 100% { opacity: 0; transform: translate(var(--x-start), var(--y-start)) scale(0.5); }
+  50% { opacity: 0.05; /* Very faint */ transform: translate(var(--x-end), var(--y-end)) scale(1); }
+}
+
+/* Keyframes for Overture/Monolith Entry */
+@keyframes revealMonolithTitle {
+  to { opacity: 0.7; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeInMonolithPrompt {
+  to { opacity: 0.5; }
 }

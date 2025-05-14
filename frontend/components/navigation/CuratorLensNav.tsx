@@ -11,42 +11,43 @@ interface NavItemDef {
 
 const CuratorLensNav: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { activeCanvas, setActiveCanvas } = useCanvas(); // Get activeCanvas
-
-  useEffect(() => {
-    console.log('CuratorLensNav mounted, isOpen:', isOpen);
-  }, [isOpen]);
+  const { activeCanvas, setActiveCanvas } = useCanvas();
 
   const navItems: NavItemDef[] = [
     { id: 'home', label: 'Home' },
-    { id: 'portfolio', label: 'Portfolio' }, // Changed from 'atelier'
+    { id: 'portfolio', label: 'Atelier' },
     { id: 'services', label: 'Services' },
     { id: 'journal', label: 'Journal' },
+    { id: 'contact', label: 'Contact' }
   ];
 
-  // Add Contact to the main nav list if it's not meant to be separate from these items
-  const allNavItems: NavItemDef[] = [
-    ...navItems,
-    { id: 'contact', label: 'Contact Us' } // Consistent with other CanvasIds, label can be adjusted
-  ];
+  // Handle navigation when a menu item is clicked
+  const handleNavigation = (canvasId: CanvasId) => {
+    setActiveCanvas(canvasId);
+    setIsOpen(false); // Close menu after navigation
+  };
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   // Animation variants for nav container
   const navContainerVariants = {
     hidden: {
       opacity: 0,
-      x: 50,
+      x: -20,
       transition: {
-        staggerChildren: 0.05, // Stagger children when hiding
-        staggerDirection: -1,  // Reverse the stagger
-        when: 'afterChildren', // Hide parent after children
+        staggerChildren: 0.05,
+        staggerDirection: -1,
+        when: 'afterChildren',
       },
     },
     visible: {
       opacity: 1,
       x: 0,
       transition: {
-        staggerChildren: 0.08, // Stagger children when showing
-        when: 'beforeChildren', // Show parent before children
+        staggerChildren: 0.08,
+        when: 'beforeChildren',
       },
     },
   };
@@ -55,7 +56,7 @@ const CuratorLensNav: React.FC = () => {
   const navItemVariants = {
     hidden: {
       opacity: 0,
-      x: 20,
+      x: -10,
       transition: { duration: 0.2 },
     },
     visible: {
@@ -65,107 +66,102 @@ const CuratorLensNav: React.FC = () => {
     },
   };
 
-  // Handle navigation when a menu item is clicked
-  const handleNavigation = (canvasId: CanvasId) => {
-    setActiveCanvas(canvasId);
-    setIsOpen(false); // Close menu after navigation
-  };
-
-  const toggleMenu = () => {
-    console.log('Toggle menu clicked, current state:', isOpen);
-    setIsOpen(!isOpen);
-  };
-
   return (
-    <div className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-[100]" style={{ opacity: 1, transform: 'none', zIndex: 100 }}> {/* Ensure high z-index */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.nav
-            className="mb-3 p-3 bg-brand-dark-gray/80 backdrop-blur-lg rounded-lg shadow-2xl border border-brand-off-white/10 w-48"
-            variants={navContainerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            style={isOpen ? { opacity: 1, transform: 'none', zIndex: 90 } : undefined}
-          >
-            <ul className="space-y-1.5">
-              {allNavItems.map((item) => (
-                <motion.li key={item.id} variants={navItemVariants}>
-                  <button
-                    onClick={() => handleNavigation(item.id)}
-                    className={`font-roboto-mono w-full text-left py-2 px-3 rounded-md transition-all duration-200 ease-in-out 
-                               ${activeCanvas === item.id 
-                                 ? 'bg-primary-accent/20 text-primary-accent font-medium' 
-                                 : 'text-brand-off-white/80 hover:bg-brand-off-white/10 hover:text-brand-off-white'}`}
-                  >
-                    <span className="flex items-center">
-                      {activeCanvas === item.id && (
-                        <motion.div 
-                          layoutId="activeNavIndicator"
-                          className="w-1.5 h-1.5 bg-primary-accent rounded-full mr-2.5"
-                        />
-                      )}
-                      {item.label}
-                    </span>
-                  </button>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.nav>
-        )}
-      </AnimatePresence>
-
-      <motion.button
-        onClick={toggleMenu}
-        className="fixed bottom-8 right-8 md:bottom-12 md:right-12 w-16 h-16 rounded-full bg-blue-500 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center focus:outline-none shadow-lg shadow-blue-500/30"
-        aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          opacity: 1,
-          transform: 'none',
-          zIndex: 1000, // Extremely high z-index to ensure visibility
-          position: 'fixed',
-          bottom: '3rem', // 12px
-          right: '3rem', // 12px
-          boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)'
-        }}
+    <>
+      {/* Position indicator - shows current location in the experience */}
+      <motion.div 
+        className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-black py-3 px-8"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
       >
-        {/* Icon structure: two spans forming a '+' that rotates to 'X' */}
-        <motion.div
-          animate={{ rotate: isOpen ? 45 : 0 }}
-          transition={{ duration: 0.3 }}
-          style={{ position: 'relative' }}
+        <span className="font-montserrat text-white">
+          {activeCanvas.charAt(0).toUpperCase() + activeCanvas.slice(1)}
+        </span>
+      </motion.div>
+
+      {/* Orbital Navigator (bottom left) */}
+      <div className="fixed bottom-12 left-12 z-[100]">
+        <motion.button
+          onClick={toggleMenu}
+          className={`w-9 h-9 bg-transparent border border-white/10 rounded-full flex items-center justify-center focus:outline-none shadow-lg transition-all duration-700 ${isOpen ? 'border-[#50E3C2]' : ''}`}
+          aria-label={isOpen ? 'Close Menu' : 'Open Menu'}
+          whileHover={{ 
+            scale: 1.2, 
+            rotate: -15,
+            borderColor: '#50E3C2' 
+          }}
+          transition={{ duration: 0.7, ease: [0.83, 0, 0.17, 1] }}
         >
-          <span className="block absolute h-1 w-8 bg-white" />
-          <span
-            className="block absolute h-1 w-8 bg-white"
-            style={{ transform: 'rotate(90deg)' }}
-          />
-          <span className="sr-only">Menu</span>
-        </motion.div>
-        
-        {/* Text indicator */}
-        <span 
-          style={{
-            position: 'absolute',
-            bottom: '-25px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            color: 'white',
-            padding: '3px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            whiteSpace: 'nowrap',
-            fontWeight: 500
+          <motion.div
+            animate={{ rotate: isOpen ? 135 : 0 }}
+            transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1] }}
+            className="relative w-3 h-[1px] flex items-center justify-center"
+          >
+            <span className={`absolute h-[1px] w-3 bg-[#0073E6] shadow-[0_0_5px_#0073E6] transition-colors duration-400 ${isOpen ? 'bg-white' : ''}`} />
+            <span
+              className={`absolute h-[1px] w-3 bg-[#0073E6] shadow-[0_0_5px_#0073E6] transition-colors duration-400 ${isOpen ? 'bg-white' : ''}`}
+              style={{ transform: 'rotate(90deg)' }}
+            />
+          </motion.div>
+        </motion.button>
+
+        {/* Orbital Menu */}
+        <motion.div
+          className="fixed bottom-12 left-32 transform origin-left"
+          initial={{ 
+            opacity: 0, 
+            scale: 0.8,
+            x: -20,
+            visibility: 'hidden',
+            pointerEvents: 'none'
+          }}
+          animate={isOpen ? {
+            opacity: 1,
+            scale: 1,
+            x: 0,
+            visibility: 'visible',
+            pointerEvents: 'auto'
+          } : {
+            opacity: 0,
+            scale: 0.8,
+            x: -20,
+            visibility: 'hidden',
+            pointerEvents: 'none'
+          }}
+          transition={{ 
+            duration: 0.6, 
+            ease: [0.4, 0, 0.2, 1],
           }}
         >
-          {isOpen ? 'Close Menu' : 'Menu'}
-        </span>
-      </motion.button>
-    </div>
+          <div className="flex flex-col items-start">
+            {navItems.map((item, index) => (
+              <motion.button
+                key={item.id}
+                onClick={() => handleNavigation(item.id)}
+                className={`font-montserrat font-light text-sm py-1.5 my-1 bg-transparent border-none cursor-pointer transition-all duration-400 tracking-wider
+                  ${activeCanvas === item.id 
+                    ? 'text-[#0073E6] font-medium tracking-wider text-shadow-[0_0_8px_#0073E6]' 
+                    : 'text-[#A0A0A0] hover:text-white hover:translate-x-1'}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.4,
+                  delay: isOpen ? 0.1 + (index * 0.05) : 0
+                }}
+                whileHover={{ 
+                  x: 5,
+                  letterSpacing: '0.12em',
+                  transition: { duration: 0.4 }
+                }}
+              >
+                {item.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </>
   );
 };
 

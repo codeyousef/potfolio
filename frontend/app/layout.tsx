@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Montserrat, Roboto_Mono } from 'next/font/google';
 import './globals.css';
+// import './components.css'; // Temporarily commented out for diagnosis
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -35,7 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${montserrat.variable} ${robotoMono.variable}`}>
-      <body>
+      <body className="font-sans bg-blue-500 text-brand-text">
         {children}
       </body>
     </html>

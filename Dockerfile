@@ -22,6 +22,15 @@ COPY frontend/ .
 COPY --from=frontend-deps /app/frontend/node_modules ./node_modules
 RUN bun run build
 
+# ---- Frontend Development Stage ----
+# Inherit from frontend-deps (which uses bun-base and runs bun install)
+FROM frontend-deps AS frontend-dev
+# WORKDIR is already /app/frontend from frontend-deps
+ENV NODE_ENV=development
+EXPOSE 3000
+# Source code will be mounted from the host. node_modules are already installed by frontend-deps.
+CMD ["bun", "run", "dev"]
+
 # ---- Frontend Runner Stage ----
 FROM node-base AS frontend-runner
 WORKDIR /app
