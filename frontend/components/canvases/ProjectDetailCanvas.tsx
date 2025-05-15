@@ -1,49 +1,21 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-
-// Re-using mock data structure from AtelierCanvas for now
-interface ProjectItem {
-  id: string;
-  title: string;
-  category: string;
-  imageUrl: string;
-  year: string;
-  description?: string; // Added for detail view
-  longDescription?: string[];
-  techStack?: string[];
-  liveUrl?: string;
-}
-
-// Expanded mock project data (ensure IDs match those in AtelierCanvas if direct linking)
-const mockProjectsData: ProjectItem[] = [
-  { id: '1', title: 'Project Alpha', category: 'Web Design', imageUrl: 'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80', year: '2023', description: 'A cutting-edge web experience for a leading tech innovator.', longDescription: ['Detailed paragraph 1 about Alpha. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'Detailed paragraph 2 about Alpha. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'], techStack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Directus'], liveUrl: '#' },
-  { id: '2', title: 'System Beta', category: 'Branding', imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80', year: '2022', description: 'A comprehensive branding strategy for a disruptive startup.', longDescription: ['More details about System Beta...'], techStack: ['Illustrator', 'Photoshop', 'Figma'], liveUrl: '#' },
-  { id: '3', title: 'Initiative Gamma', category: 'Interactive Art', imageUrl: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80', year: '2024', description: 'An immersive art installation exploring digital consciousness.', longDescription: ['Exploring the depths of Initiative Gamma...'], techStack: ['Processing', 'Unity', 'TouchDesigner'] },
-  { id: '4', title: 'Delta Framework', category: 'UX/UI', imageUrl: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80', year: '2023', description: 'A user-centric design framework for enterprise applications.' },
-  { id: '5', title: 'Epsilon Launch', category: 'Development', imageUrl: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80', year: '2024', description: 'Full-stack development of a scalable e-commerce platform.' },
-  { id: '6', title: 'Zeta Synthesis', category: 'Creative Coding', imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80', year: '2022', description: 'Generative visuals and soundscapes for a live performance.' },
-];
+import { DirectusProject, DirectusFile } from './ProjectSculpture';
 
 interface ProjectDetailCanvasProps {
-  slug: string;
+  project: DirectusProject | null;
+  directusAssetBaseUrl: string;
 }
 
-const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
-  const [project, setProject] = useState<ProjectItem | null>(null);
-
-  useEffect(() => {
-    const foundProject = mockProjectsData.find(p => p.id === slug);
-    setProject(foundProject || null);
-  }, [slug]);
-
+const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ project, directusAssetBaseUrl }) => {
   if (!project) {
     return (
       <div className="flex items-center justify-center min-h-screen text-brand-off-white bg-brand-dark-gray">
-        <p>Loading project details or project not found...</p>
+        <p>Project data is not available.</p>
       </div>
     );
   }
@@ -57,6 +29,20 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
     }),
   };
 
+  const getFullImageUrl = (imageAsset: DirectusFile | string | undefined, presetKey?: string): string => {
+    if (!imageAsset) return '/placeholder-project-detail.jpg';
+    const imageId = typeof imageAsset === 'string' ? imageAsset : imageAsset.id;
+    const queryParams = presetKey ? `?key=${presetKey}` : '?fit=cover&width=1200&height=675&quality=80';
+    return `${directusAssetBaseUrl}/assets/${imageId}${queryParams}`;
+  };
+
+  const mainImageUrl = getFullImageUrl(project.main_image, 'project-detail-hero');
+  const mainImageAlt = typeof project.main_image === 'object' && project.main_image?.title 
+    ? project.main_image.title 
+    : project.title || 'Project main image';
+
+  const longDescriptionHtml = project.long_description_html || project.description;
+
   return (
     <motion.div 
       className="min-h-screen bg-brand-dark-gray text-brand-off-white selection:bg-primary-accent selection:text-brand-pure-white"
@@ -66,8 +52,8 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
     >
       <header className="relative h-[60vh] md:h-[70vh] w-full">
         <Image
-          src={project.imageUrl}
-          alt={project.title}
+          src={mainImageUrl}
+          alt={mainImageAlt}
           fill
           className="object-cover"
           priority
@@ -77,42 +63,69 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
           className="absolute bottom-0 left-0 p-8 md:p-12 lg:p-16"
           custom={0} variants={sectionVariants} initial="hidden" animate="visible"
         >
-          <Link href="/#portfolio" scroll={false} className="font-inter text-sm text-primary-accent hover:underline mb-2 inline-block">
+          <Link href="/portfolio#portfolio-grid" scroll={false} className="font-inter text-sm text-primary-accent hover:underline mb-2 inline-block">
             &larr; Return to Portfolio
           </Link>
           <h1 className="font-montserrat font-bold text-4xl md:text-6xl lg:text-7xl text-brand-off-white leading-tight tracking-tight">
             {project.title}
           </h1>
           <p className="font-inter text-lg md:text-xl text-brand-off-white/80 mt-2">
-            {project.category} / {project.year}
+            {project.category} {project.year && `/ ${project.year}`}
           </p>
         </motion.div>
       </header>
 
       <main className="max-w-4xl mx-auto p-8 md:p-12 lg:p-16">
-        <motion.section custom={1} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
-          <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">Overview</h2>
-          <p className="font-inter text-brand-off-white/90 leading-relaxed text-base md:text-lg">
-            {project.description || 'Detailed description coming soon.'}
-          </p>
-        </motion.section>
-
-        {project.longDescription && (
-          <motion.section custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
-            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">The Story</h2>
-            {project.longDescription.map((paragraph, index) => (
-              <p key={index} className="font-inter text-brand-off-white/90 leading-relaxed text-base md:text-lg mb-4">
-                {paragraph}
-              </p>
-            ))}
+        {project.description && (
+          <motion.section custom={1} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
+            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">Overview</h2>
+            <div 
+              className="font-inter text-brand-off-white/90 leading-relaxed text-base md:text-lg prose prose-invert prose-neutral lg:prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: project.description.replace(/\n/g, '<br />') }}
+            />
           </motion.section>
         )}
 
-        {project.techStack && project.techStack.length > 0 && (
+        {longDescriptionHtml && project.description !== longDescriptionHtml && (
+          <motion.section custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
+            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">The Story</h2>
+            <div 
+              className="font-inter text-brand-off-white/90 leading-relaxed text-base md:text-lg prose prose-invert prose-neutral lg:prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: longDescriptionHtml.replace(/\n/g, '<br />') }}
+            />
+          </motion.section>
+        )}
+
+        {project.gallery_images && project.gallery_images.length > 0 && (
+          <motion.section custom={2.5} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
+            <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">Gallery</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {project.gallery_images.map((imageItem, index) => {
+                const galleryImg = imageItem.directus_files_id;
+                if (!galleryImg) return null;
+                const galleryImageUrl = getFullImageUrl(galleryImg, 'project-gallery-thumb');
+                const galleryImageAlt = typeof galleryImg === 'object' && galleryImg.title ? galleryImg.title : `${project.title} gallery image ${index + 1}`;
+                return (
+                  <div key={typeof galleryImg === 'string' ? galleryImg : galleryImg.id} className="relative aspect-video rounded overflow-hidden shadow-lg">
+                    <Image 
+                      src={galleryImageUrl}
+                      alt={galleryImageAlt}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 50vw"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </motion.section>
+        )}
+
+        {project.tech_stack && project.tech_stack.length > 0 && (
           <motion.section custom={3} variants={sectionVariants} initial="hidden" animate="visible" className="mb-12">
             <h2 className="font-montserrat font-semibold text-2xl md:text-3xl text-brand-off-white mb-4">Technology Stack</h2>
             <div className="flex flex-wrap gap-2">
-              {project.techStack.map(tech => (
+              {project.tech_stack.map(tech => (
                 <span key={tech} className="bg-primary-accent/10 text-primary-accent px-3 py-1.5 rounded-full text-xs sm:text-sm font-inter font-medium">
                   {tech}
                 </span>
@@ -121,23 +134,35 @@ const ProjectDetailCanvas: React.FC<ProjectDetailCanvasProps> = ({ slug }) => {
           </motion.section>
         )}
         
-        {project.liveUrl && project.liveUrl !== '#' && (
-            <motion.div custom={4} variants={sectionVariants} initial="hidden" animate="visible" className="mt-12 text-center">
-                <Link 
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block font-montserrat text-lg bg-primary-accent text-brand-pure-white px-8 py-3 rounded-md hover:bg-primary-accent/80 transition-colors duration-300 shadow-md hover:shadow-lg"
-                >
-                    View Live Project
-                </Link>
+        {(project.live_url || project.repo_url) && (
+            <motion.div custom={4} variants={sectionVariants} initial="hidden" animate="visible" className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4">
+                {project.live_url && project.live_url !== '#' && (
+                    <Link 
+                        href={project.live_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block w-full sm:w-auto text-center font-montserrat text-lg bg-primary-accent text-brand-pure-white px-8 py-3 rounded-md hover:bg-primary-accent/80 transition-colors duration-300 shadow-md hover:shadow-lg"
+                    >
+                        View Live Project
+                    </Link>
+                )}
+                {project.repo_url && project.repo_url !== '#' && (
+                     <Link 
+                        href={project.repo_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block w-full sm:w-auto text-center font-montserrat text-lg bg-transparent border border-primary-accent text-primary-accent px-8 py-3 rounded-md hover:bg-primary-accent/10 transition-colors duration-300 shadow-md hover:shadow-lg"
+                    >
+                        View Repository
+                    </Link>
+                )}
             </motion.div>
         )}
 
       </main>
       
       <footer className="text-center p-8 border-t border-brand-off-white/10 mt-16">
-        <Link href="/#portfolio" scroll={false} className="font-inter text-sm text-primary-accent hover:underline">
+        <Link href="/portfolio#portfolio-grid" scroll={false} className="font-inter text-sm text-primary-accent hover:underline">
             &larr; Back to The Portfolio
         </Link>
         <p className="text-xs text-brand-off-white/50 mt-2">Aethelframe Protocol &copy; {new Date().getFullYear()}</p>

@@ -3,109 +3,77 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEmergence } from '@/context/EmergenceContext';
-
-// Define types for our data
-interface ProjectItem {
-  id: string;
-  title: string;
-  category: string;
-  imageUrl: string;
-  year: string;
-  description?: string;
-  tags?: string[];
-}
+import { getPublishedProjects } from '@/lib/directus'; // Import function to fetch projects
+import { DirectusProject } from '@/components/canvases/ProjectSculpture'; // Import DirectusProject type
 
 const PortfolioCanvas: React.FC = () => {
   const { currentPhase } = useEmergence();
+  const directusAssetBaseUrl = process.env.NEXT_PUBLIC_API_URL; // For image URLs
+
+  // State for projects, loading, and errors
+  const [projects, setProjects] = useState<DirectusProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // State for filters
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<ProjectItem[]>([]);
-  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [filteredProjects, setFilteredProjects] = useState<DirectusProject[]>([]);
+  const [selectedProject, setSelectedProject] = useState<DirectusProject | null>(null);
 
-  // Mock data - would be fetched from Directus in production
-  const mockProjects: ProjectItem[] = [
-    {
-      id: '1',
-      title: 'Emergence Protocol',
-      category: 'Web Design',
-      imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f',
-      year: '2023',
-      description: 'A responsive web application with dynamic content and interactive elements.',
-      tags: ['React', 'TypeScript', 'Tailwind']
-    },
-    {
-      id: '2',
-      title: 'Kinetic Interface',
-      category: 'UI/UX',
-      imageUrl: 'https://images.unsplash.com/photo-1558655146-d09347e92766',
-      year: '2023',
-      description: 'Innovative user interface design with motion and interaction principles.',
-      tags: ['Figma', 'Framer', 'Prototyping']
-    },
-    {
-      id: '3',
-      title: 'Horizon Framework',
-      category: 'Development',
-      imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f',
-      year: '2022',
-      description: 'A versatile framework for building scalable web applications.',
-      tags: ['JavaScript', 'Node.js', 'API']
-    },
-    {
-      id: '4',
-      title: 'Bloom Analytics',
-      category: 'Data Visualization',
-      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
-      year: '2022',
-      description: 'Interactive data visualization dashboard with real-time updates.',
-      tags: ['D3.js', 'SVG', 'Data']
-    },
-    {
-      id: '5',
-      title: 'Veil Security',
-      category: 'Cybersecurity',
-      imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3',
-      year: '2021',
-      description: 'Advanced security protocols and encryption methods for sensitive data.',
-      tags: ['Security', 'Encryption', 'Auth']
-    },
-    {
-      id: '6',
-      title: 'Unfurling Platform',
-      category: 'Web Design',
-      imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c',
-      year: '2021',
-      description: 'A comprehensive platform for content management and distribution.',
-      tags: ['CMS', 'Content', 'Design']
-    },
-  ];
+  // Fetch projects from Directus
+  useEffect(() => {
+    if (!directusAssetBaseUrl) {
+      setError("NEXT_PUBLIC_API_URL is not set. Cannot fetch projects.");
+      setIsLoading(false);
+      return;
+    }
 
-  // Extract unique categories and years for filters
-  const categories = [...new Set(mockProjects.map(project => project.category))];
-  const years = [...new Set(mockProjects.map(project => project.year))].sort((a, b) => parseInt(b) - parseInt(a));
+    const fetchProjects = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedProjects = await getPublishedProjects();
+        setProjects(fetchedProjects);
+        setFilteredProjects(fetchedProjects); // Initialize filteredProjects
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        setError("Failed to load projects.");
+        setProjects([]);
+        setFilteredProjects([]);
+      }
+      setIsLoading(false);
+    };
+
+    fetchProjects();
+  }, [directusAssetBaseUrl]);
+
+  // Extract unique categories and years for filters from fetched projects
+  const categories = [...new Set(projects.map(project => project.category || 'Uncategorized'))];
+  const years = [...new Set(projects.map(project => project.year || 'Unknown Year'))].sort((a, b) => {
+    const yearA = parseInt(a);
+    const yearB = parseInt(b);
+    if (isNaN(yearA) && isNaN(yearB)) return 0;
+    if (isNaN(yearA)) return 1; // Push 'Unknown Year' or non-numeric years to the end
+    if (isNaN(yearB)) return -1;
+    return yearB - yearA;
+  });
 
   // Filter projects based on selected categories and years
   useEffect(() => {
-    let filtered = [...mockProjects];
+    let filtered = [...projects]; // Start with all fetched projects
     
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(project => selectedCategories.includes(project.category));
+      filtered = filtered.filter(project => project.category && selectedCategories.includes(project.category));
     }
     
     if (selectedYears.length > 0) {
-      filtered = filtered.filter(project => selectedYears.includes(project.year));
+      filtered = filtered.filter(project => project.year && selectedYears.includes(project.year));
     }
     
     setFilteredProjects(filtered);
-  }, [selectedCategories, selectedYears]);
-
-  // Initialize filtered projects with all projects
-  useEffect(() => {
-    setFilteredProjects(mockProjects);
-  }, []);
+  }, [selectedCategories, selectedYears, projects]); // Depend on projects state now
 
   // Toggle category selection
   const toggleCategory = (category: string) => {
@@ -131,7 +99,7 @@ const PortfolioCanvas: React.FC = () => {
   };
 
   // View project details
-  const viewProjectDetails = (project: ProjectItem) => {
+  const viewProjectDetails = (project: DirectusProject) => {
     setSelectedProject(project);
   };
 
@@ -205,117 +173,86 @@ const PortfolioCanvas: React.FC = () => {
 
   const styles = getPhaseStyles();
 
-  // Animation variants - adjusted for phases
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        duration: currentPhase === 'bloom' ? 0.5 : 0.7,
-        ease: currentPhase === 'bloom' ? [0.34, 1.56, 0.64, 1] : [0.16, 1, 0.3, 1],
-        when: "beforeChildren",
-        staggerChildren: currentPhase === 'seed' ? 0.15 : currentPhase === 'growth' ? 0.1 : 0.05
-      }
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full text-center p-8">
+        <p className={`text-neutral-400 text-lg ${styles.title.replace(/text-(3xl|5xl|heading|tracking-wide|mb-6)/g, '')}`}>
+          Loading Atelier...
+        </p>
+      </div>
+    );
+  }
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        duration: currentPhase === 'bloom' ? 0.6 : 0.8,
-        ease: currentPhase === 'bloom' ? [0.34, 1.56, 0.64, 1] : [0.16, 1, 0.3, 1]
-      }
-    }
-  };
-
-  const filterVariants = {
-    hidden: { height: 0, opacity: 0 },
-    visible: { 
-      height: "auto", 
-      opacity: 1,
-      transition: { duration: 0.4 }
-    }
-  };
+  if (error && projects.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full text-center p-8">
+        <p className={`text-red-500 text-lg ${styles.title.replace(/text-(3xl|5xl|heading|tracking-wide|mb-6)/g, '')}`}>
+          {error}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className={`min-h-screen ${styles.container}`}>
-      <motion.h2 
+    <motion.div 
+      className={`relative ${styles.container}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* Title */}
+      <motion.h1 
         className={styles.title}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ 
-          duration: 0.5, 
-          delay: 0.2,
-          ease: currentPhase === 'bloom' ? [0.34, 1.56, 0.64, 1] : [0.16, 1, 0.3, 1]
-        }}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
-        Portfolio
-      </motion.h2>
+        Atelier.
+      </motion.h1>
 
-      {/* Filter Toggle Button */}
-      <motion.button
-        className={styles.button}
-        onClick={toggleFilters}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
-        <span className="mr-2">{showFilters ? '−' : '+'}</span>
-        {showFilters ? 'Hide Filters' : 'Show Filters'}
-      </motion.button>
+      {/* Filters Toggle Button */}
+      <div className="flex justify-center mb-6">
+        <button onClick={toggleFilters} className={styles.button}>
+          {showFilters ? 'Hide Filters' : 'Show Filters'}
+        </button>
+      </div>
 
-      {/* Filters */}
+      {/* Filters Section */}
       <AnimatePresence>
         {showFilters && (
           <motion.div 
-            className="mt-4 overflow-hidden"
-            variants={filterVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
+            className="mb-8 p-4 bg-black/20 rounded-lg"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="p-5 border border-neutral-800 rounded-md bg-black/20">
-              {/* Categories Filter */}
-              <div className="mb-4">
-                <div className="text-sm font-mono mb-2 text-neutral-400">Categories</div>
-                <div className="flex flex-wrap mt-2">
-                  {categories.map(category => (
-                    <button
-                      key={category}
-                      onClick={() => toggleCategory(category)}
-                      className={
-                        selectedCategories.includes(category)
-                          ? styles.filterButton.active
-                          : styles.filterButton.inactive
-                      }
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
+            <div className="mb-4">
+              <h3 className={`text-lg font-semibold mb-2 ${styles.title.split(' ')[1]}`}>Categories</h3>
+              <div className="flex flex-wrap">
+                {categories.map(category => (
+                  <button 
+                    key={category}
+                    onClick={() => toggleCategory(category)}
+                    className={selectedCategories.includes(category) ? styles.filterButton.active : styles.filterButton.inactive}
+                  >
+                    {category}
+                  </button>
+                ))}
               </div>
-
-              {/* Years Filter */}
-              <div>
-                <div className="text-sm font-mono mb-2 text-neutral-400">Years</div>
-                <div className="flex flex-wrap mt-2">
-                  {years.map(year => (
-                    <button
-                      key={year}
-                      onClick={() => toggleYear(year)}
-                      className={
-                        selectedYears.includes(year)
-                          ? styles.filterButton.active
-                          : styles.filterButton.inactive
-                      }
-                    >
-                      {year}
-                    </button>
-                  ))}
-                </div>
+            </div>
+            <div>
+              <h3 className={`text-lg font-semibold mb-2 ${styles.title.split(' ')[1]}`}>Years</h3>
+              <div className="flex flex-wrap">
+                {years.map(year => (
+                  <button 
+                    key={year}
+                    onClick={() => toggleYear(year)}
+                    className={selectedYears.includes(year) ? styles.filterButton.active : styles.filterButton.inactive}
+                  >
+                    {year}
+                  </button>
+                ))}
               </div>
             </div>
           </motion.div>
@@ -323,171 +260,104 @@ const PortfolioCanvas: React.FC = () => {
       </AnimatePresence>
 
       {/* Projects Grid */}
+      {error && projects.length > 0 && (
+        <div className="text-center text-red-400 mb-6">
+          <p>{error} Displaying cached or limited data.</p>
+        </div>
+      )}
+      {!isLoading && !error && projects.length === 0 && (
+        <div className="text-center text-neutral-400 mt-10">
+          <p>No projects found matching your criteria, or the atelier is currently empty.</p>
+        </div>
+      )}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
       >
-        {filteredProjects.map(project => (
-          <motion.div
-            key={project.id}
-            className={styles.projectCard}
-            variants={itemVariants}
-            whileHover={{ 
-              y: currentPhase === 'seed' ? -5 : currentPhase === 'growth' ? -8 : -10,
-              transition: { 
-                duration: 0.3,
-                ease: currentPhase === 'bloom' ? [0.34, 1.56, 0.64, 1] : [0.16, 1, 0.3, 1] 
-              }
-            }}
-          >
-            <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
-              <img 
-                src={project.imageUrl} 
-                alt={project.title} 
-                className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-              />
-              <div className="absolute top-2 right-2 px-2 py-1 text-xs font-mono bg-black/70 rounded-sm">
-                {project.year}
+        {filteredProjects.map((project, index) => {
+          // Construct image URL from Directus asset ID
+          const imageUrl = project.main_image && typeof project.main_image === 'object' && project.main_image.id 
+            ? `${directusAssetBaseUrl}/assets/${project.main_image.id}?key=portfolio-thumb` // Added a key for potential transformations
+            : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'; // Default placeholder
+
+          return (
+            <motion.div 
+              key={project.id} 
+              className={styles.projectCard}
+              onClick={() => viewProjectDetails(project)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
+              whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.2)" }}
+            >
+              <div className="aspect-[4/3] bg-neutral-800 overflow-hidden">
+                <img src={imageUrl} alt={project.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
               </div>
-              <div className={`absolute inset-0 opacity-0 hover:opacity-100 ${styles.overlay} transition-opacity duration-300 flex items-center justify-center`}>
-                <button 
-                  onClick={() => viewProjectDetails(project)}
-                  className={styles.button}
-                >
-                  View Project
-                </button>
+              <div className="p-4">
+                <h2 className={`text-xl font-semibold mb-1 ${styles.title.split(' ')[1]}`}>{project.title}</h2>
+                <p className="text-sm text-neutral-400 mb-2">{project.category} - {project.year}</p>
               </div>
-            </div>
-            <div className="p-4">
-              <h3 className="text-lg font-heading tracking-wider mb-1">{project.title}</h3>
-              <div className="text-sm font-mono text-neutral-400 mb-3">{project.category}</div>
-              {project.description && (
-                <p className="text-sm mb-4 text-neutral-300 line-clamp-2">{project.description}</p>
-              )}
-              <div className="flex justify-between items-end">
-                <div className="flex flex-wrap">
-                  {project.tags?.slice(0, 2).map(tag => (
-                    <span key={tag} className={styles.tag}>{tag}</span>
-                  ))}
-                  {project.tags && project.tags.length > 2 && (
-                    <span className="text-xs px-2 py-1 font-mono text-neutral-400">+{project.tags.length - 2}</span>
-                  )}
-                </div>
-                <button 
-                  onClick={() => viewProjectDetails(project)}
-                  className="text-xs font-mono flex items-center gap-1 transition-colors duration-300"
-                >
-                  Details
-                  <svg 
-                    className="w-3 h-3" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path 
-                      d="M5 12H19M19 12L12 5M19 12L12 19" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {/* Project Details Modal */}
       <AnimatePresence>
         {selectedProject && (
-          <motion.div
+          <motion.div 
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${styles.overlay}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-            onClick={closeProjectDetails}
+            onClick={closeProjectDetails} // Close on overlay click
           >
             <motion.div 
-              className="bg-black/90 border border-neutral-800 max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-md"
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              onClick={(e) => e.stopPropagation()}
+              className={`bg-neutral-900 p-6 rounded-lg shadow-2xl max-w-2xl w-full relative border ${styles.projectCard.replace(/hover:[^ ]+/, '')}`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal content
             >
-              <div className="relative">
-                <img 
-                  src={selectedProject.imageUrl} 
-                  alt={selectedProject.title} 
-                  className="w-full h-64 md:h-80 object-cover"
-                />
-                <button 
-                  onClick={closeProjectDetails}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/70 flex items-center justify-center"
-                >
-                  <svg 
-                    className="w-4 h-4" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path 
-                      d="M18 6L6 18M6 6L18 18" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
+              <button 
+                onClick={closeProjectDetails} 
+                className={`absolute top-3 right-3 text-2xl ${styles.title.split(' ')[1]} hover:opacity-70 transition-opacity`}
+              >
+                &times;
+              </button>
+              <h2 className={`text-3xl font-bold mb-3 ${styles.title.split(' ')[1]}`}>{selectedProject.title}</h2>
+              <p className="text-sm text-neutral-400 mb-3">{selectedProject.category} - {selectedProject.year}</p>
+              {
+                selectedProject.main_image && typeof selectedProject.main_image === 'object' && selectedProject.main_image.id && (
+                  <div className="w-full h-64 md:h-80 rounded-md overflow-hidden mb-4 bg-neutral-800">
+                    <img 
+                      src={`${directusAssetBaseUrl}/assets/${selectedProject.main_image.id}?key=portfolio-detail`}
+                      alt={selectedProject.title} 
+                      className="w-full h-full object-cover"
                     />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-2xl font-heading tracking-wider">{selectedProject.title}</h2>
-                  <div className="px-2 py-1 text-xs font-mono bg-black/70 rounded-sm">{selectedProject.year}</div>
-                </div>
-                <div className="text-sm font-mono text-neutral-400 mb-4">{selectedProject.category}</div>
-                <p className="text-base mb-6">{selectedProject.description}</p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {selectedProject.tags?.map(tag => (
-                    <span key={tag} className={styles.tag}>{tag}</span>
+                  </div>
+                )
+              }
+              <p className="text-neutral-300 mb-4 whitespace-pre-wrap">
+                {selectedProject.description || 'No description available.'}
+              </p>
+              {selectedProject.tags && selectedProject.tags.length > 0 && (
+                <div className="flex flex-wrap">
+                  {selectedProject.tags.map(tag => (
+                    <span key={tag} className={styles.tag}>
+                      {tag}
+                    </span>
                   ))}
                 </div>
-                <button className={styles.button}>
-                  Visit Project
-                </button>
-              </div>
+              )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Contact CTA */}
-      <motion.div 
-        className="mt-12 p-6 border border-neutral-800 rounded-md bg-black/30 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <h3 className={`text-xl md:text-2xl font-heading mb-3 ${
-          currentPhase === 'seed' 
-            ? 'text-seed-accent' 
-            : currentPhase === 'growth' 
-              ? 'text-growth-accent' 
-              : 'text-bloom-accent'
-        }`}>
-          Interested in working together?
-        </h3>
-        <p className="text-neutral-300 mb-6 max-w-xl mx-auto">
-          Let's discuss how we can bring your vision to life
-        </p>
-        <button className={styles.button}>Get in Touch</button>
-      </motion.div>
-    </div>
+    </motion.div>
   );
 };
 

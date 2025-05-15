@@ -86,7 +86,7 @@ Objective: To provide a detailed specification for AI coding agents to implement
 
 - [x] **Task 3.1:** Canvas Management: Global state (React Context/Zustand/Jotai) for `activeCanvasId`. `SiteShell.tsx` uses this to render only the active canvas within `AnimatePresence`.
     
-- [ ] **Task 3.2 (Optional):** `KineticCanvasWrapper.tsx` component: `motion.section` that takes `isActive` prop and handles its own `initial`, `animate`, `exit`, `transition` props for shared canvas transition logic (perspective, rotateY, scale, translateZ).
+- [x] **Task 3.2:** `KineticCanvasWrapper.tsx` component: `motion.section` that takes `isActive` prop and handles its own `initial`, `animate`, `exit`, `transition` props for shared canvas transition logic (perspective, rotateY, scale, translateZ).
     
 - [x] **Task 3.3:** `HomeCanvas.tsx` component (`frontend/components/canvases/HomeCanvas.tsx`):
     
@@ -175,15 +175,23 @@ Objective: To provide a detailed specification for AI coding agents to implement
 
 - [ ] **Task 5.1:** Fetch data from Directus API in Next.js (Server Components for initial data, client-side fetching with SWR/React Query for dynamic updates if needed).
     
-    - Portfolio items for `PortfolioCanvas` and `ProjectDetailCanvas` (fetching `initialX`, `initialY` if stored in Directus).
+    - [x] Portfolio items for `PortfolioCanvas`.
+    - [x] Portfolio items for `ProjectDetailCanvas`.
+    - [x] Journal entries for `JournalCanvas`.
+    - [x] Services content for `ServicesCanvas`.
         
-    - Journal entries for `JournalCanvas`.
-        
-    - Services content for `ServicesCanvas`.
-        
-- [ ] **Task 5.2:** Implement dynamic routing in Next.js for `ProjectDetailCanvas` (`/portfolio/[slug]`) and individual journal entry pages.
+- [x] **Task 5.2:** Implement dynamic routing in Next.js for `ProjectDetailCanvas` (`/portfolio/[slug]`) and individual journal entry pages (`/journal/[slug]`).
     
-- [ ] **Task 5.3:** Handle image rendering from Directus using Next.js `<Image>` component. Construct asset URLs: `DIRECTUS_URL/assets/IMAGE_ID`.
+    - [x] Update `lib/directus.ts` to add `getProjectBySlug(slug: string)`.
+    - [x] Create `app/portfolio/[slug]/page.tsx`.
+    - [x] Fetch data & pass to `ProjectDetailCanvas`.
+    - [x] Handle `notFound`.
+    - [x] Update `ProjectDetailCanvas` to use fetched data.
+    - [x] Update `lib/directus.ts` to add `getJournalEntryBySlug(slug: string)`.
+    - [x] Create `app/journal/[slug]/page.tsx` for individual entries. DONE
+    - [x] Ensure `JournalEntryCard.tsx` links to the correct `[slug]` page. DONE
+    
+- [x] **Task 5.3:** Handle image rendering from Directus using Next.js `<Image>` component. Construct asset URLs: `DIRECTUS_URL/assets/IMAGE_ID`.
     
 - [ ] **Task 5.4:** Contact form submission: Next.js API Route sends data to Directus (custom endpoint or SDK to create item in "ConversionActions" / trigger Flow).
     

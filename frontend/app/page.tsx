@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Overture from '../components/sections/Overture';
 import SiteShell from '../components/core/SiteShell';
-import { EmergenceProvider } from '../context/EmergenceContext';
+import EmergenceProvider from '../context/EmergenceContext';
 
 const overtureVariants = {
   initial: {

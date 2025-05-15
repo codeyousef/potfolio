@@ -1,95 +1,128 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { getPublishedServices } from '@/lib/directus';
+import ServiceCard from './ServiceCard';
+import { DirectusService } from './ProjectSculpture';
 
-interface ServiceItem {
-  id: string;
-  icon: string; // Placeholder for icon, e.g., emoji or char
-  title: string;
-  description: string;
-}
+const ServicesCanvas = () => {
+  const [services, setServices] = useState<DirectusService[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const directusAssetBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-const mockServices: ServiceItem[] = [
-  { id: '1', icon: '💡', title: 'Digital Strategy & Consultation', description: 'Crafting visionary roadmaps for digital transformation and impactful online presence.' },
-  { id: '2', icon: '✨', title: 'Interactive Experiences & Art', description: 'Designing and developing immersive, engaging digital art and interactive installations.' },
-  { id: '3', icon: '💻', title: 'Avant-Garde Web Development', description: 'Building cutting-edge websites and web applications with a focus on artistry and performance.' },
-  { id: '4', icon: '👁️‍🗨️', title: 'Brand Narrative & Visual Identity', description: 'Defining and expressing unique brand stories through compelling visual systems and narrative design.' },
-];
+  useEffect(() => {
+    if (!directusAssetBaseUrl) {
+      setError("NEXT_PUBLIC_API_URL is not set. Cannot fetch services.");
+      setIsLoading(false);
+      return;
+    }
 
-const ServicesCanvas: React.FC = () => {
+    const fetchServices = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedServices = await getPublishedServices();
+        setServices(fetchedServices);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch services:", err);
+        setError("Failed to load services.");
+        setServices([]); // Clear services on error
+      }
+      setIsLoading(false);
+    };
+
+    fetchServices();
+  }, [directusAssetBaseUrl]);
+
   const titleVariants = {
-    hidden: { opacity: 0, y: -20 },
+    hidden: { opacity: 0, y: -30 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.7,
+        duration: 0.8,
         ease: [0.6, -0.05, 0.01, 0.99],
         delay: 0.3,
       },
     },
   };
 
-  const listVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.5, // Delay after title
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.95 },
+  const introTextVariants = {
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.43, 0.13, 0.23, 0.96],
-      },
+      transition: { duration: 0.7, delay: 0.5 }, 
     },
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full text-center p-8">
+        <p className="text-neutral-400 text-lg">Loading Services Spectrum...</p>
+      </div>
+    );
+  }
+
+  if (error && !services.length) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full text-center p-8">
+        <p className="text-red-500 text-lg">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
       className="flex flex-col items-center justify-start h-full w-full text-center p-8 pt-16 md:pt-24 overflow-y-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
       <motion.h1
-        className="font-montserrat font-medium text-5xl md:text-7xl lg:text-8xl text-secondary-accent leading-tight tracking-tight mb-12 md:mb-16"
+        className="font-montserrat font-medium text-5xl md:text-7xl lg:text-8xl text-secondary-accent leading-tight tracking-tight mb-8 md:mb-12"
         variants={titleVariants}
         initial="hidden"
         animate="visible"
       >
         Services Spectrum.
       </motion.h1>
-      
-      <motion.div
-        className="w-full max-w-4xl space-y-8 md:space-y-10"
-        variants={listVariants}
+
+      <motion.p 
+        className="mb-12 md:mb-16 font-inter text-lg md:text-xl text-brand-off-white/70 max-w-xl mx-auto"
+        variants={introTextVariants}
         initial="hidden"
         animate="visible"
       >
-        {mockServices.map((service) => (
-          <motion.div 
-            key={service.id} 
-            className="bg-brand-dark-gray/30 p-6 md:p-8 rounded-lg shadow-custom-subtle border border-brand-off-white/10 flex flex-col items-center text-center"
-            variants={itemVariants}
-          >
-            <span className="text-4xl md:text-5xl mb-4 md:mb-5" role="img" aria-label={`${service.title} icon`}>{service.icon}</span>
-            <h3 className="font-montserrat font-semibold text-xl md:text-2xl text-brand-off-white mb-3">
-              {service.title}
-            </h3>
-            <p className="font-inter text-sm md:text-base text-brand-off-white/80 leading-relaxed max-w-md">
-              {service.description}
-            </p>
-          </motion.div>
-        ))}
-      </motion.div>
+        Offering a curated selection of services at the intersection of design, technology, and digital artistry to bring your vision to life.
+      </motion.p>
+
+      {error && services.length === 0 && !isLoading && (
+         <div className="text-center text-red-500 my-10">
+           <p>{error}</p>
+         </div>
+      )}
+
+      {!isLoading && !error && services.length === 0 && (
+        <div className="text-center text-neutral-400 my-10">
+          <p>No services are currently listed. Please check back later.</p>
+        </div>
+      )}
+
+      {services.length > 0 && (
+        <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 px-4">
+          {services.map((service, index) => (
+            <ServiceCard 
+              key={service.id} 
+              service={service} 
+              directusAssetBaseUrl={directusAssetBaseUrl!}
+              index={index} 
+            />
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 };
