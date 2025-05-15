@@ -1,148 +1,313 @@
-# Aethelframe Protocol: Emergence - Implementation Plan with Conversion Optimization (Next.js & Directus)
+## Aethelframe Protocol (Emergence Theme): Detailed Design & Implementation Specification
 
-**Objective:** Implement "Aethelframe Protocol" portfolio per updated `docs/Portfolio.md`, focusing on "Emergence" narrative with conversion optimization.
-**Guiding Design Document:** `docs/Portfolio.md` (Version 1.2)
-**Tech Stack:**
-*   Frontend: Next.js (TypeScript), React, Tailwind CSS, Framer Motion, Bun
-*   Backend: Directus, Bun
-*   Database: PostgreSQL
-*   Environment: Docker
+Version: 1.2 (Optimized for AI Implementation with Framer Motion)
 
----
+Date: May 15, 2025
 
-## Phase 0: Project & Environment Setup
+Objective: To provide a detailed specification for AI coding agents to implement the "Aethelframe Protocol" interactive portfolio. This document integrates the "Emergence" theme (a narrative of transformation) into a dominant Art/High Fashion aesthetic with subtle Cyberpunk/Old Money influences. The implementation should leverage Next.js, Directus, Tailwind CSS, and Framer Motion within a Dockerized Bun environment.
 
-*   **Task 0.1:** Verify Docker setup (`Dockerfile`, `docker-compose.yml`, `start-services.sh`).
-*   **Task 0.2:** Configure Tailwind CSS (`frontend/tailwind.config.ts`): theme values (colors, fonts from `Portfolio.md`), custom utility classes for conversion elements.
-*   **Task 0.3:** Global styles (`frontend/app/globals.css`): font imports, base body styles, SVG noise/grain effect, conversion element base styles.
-*   **Task 0.4:** Main Next.js layout (`frontend/app/layout.tsx`): metadata, fonts, global styles wrapper.
-*   **Task 0.5:** Simple analytics setup - add Vercel Analytics, Plausible, or similar lightweight solution to track conversion paths.
-*   **Task 0.6 (Optional):** Basic Directus collections (e.g., "Projects") for parallel backend work.
+**Guiding Principles for AI Agent:**
 
----
+- **Adhere to the "Emergence" Narrative:** The design subtly transitions through three phases:
+    
+    1. **Seed/Veil (Overture):** Introspective, contained, dark, slow.
+        
+    2. **Growth/Unfurling (Transitions, Early Canvases):** Gradual illumination, expansion, layers peeling.
+        
+    3. **Bloom/Horizon (Main Canvases):** Bright, spacious, confident, polished.
+        
+- **Prioritize Art/High Fashion Aesthetic:** Minimalism, elegance, dramatic space, refined typography, simulated luxury materials.
+    
+- **Implement Novel Navigation & Layouts:** Move beyond traditional web structures as detailed.
+    
+- **Leverage Framer Motion:** Explicitly use Framer Motion for all significant animations, transitions, and interactive visual effects.
+    
+- **Use Tailwind CSS for Base Styling & Layout:** Apply Tailwind for typography, spacing, color theming, and responsive grid/flex structures. Custom CSS will be needed for highly bespoke elements and complex visual effects not easily achievable with Tailwind alone.
+    
+- **Accessibility (WCAG 2.1 AA):** Crucial. All novel interactions must have accessible alternatives. Respect `prefers-reduced-motion`.
+    
+- **Performance:** Optimize all animations and asset loading.
+    
 
-## Phase 1: The Overture (Seed/Veil) - Frontend with Skip Option
+### 0. Core Technologies & Environment Setup
 
-*   **Task 1.1:** `Overture` React component (`frontend/components/sections/Overture.tsx`): JSX for "Monolith Entry," title, `[ BEGIN ]` prompt.
-*   **Task 1.2:** Style `Overture` with Tailwind: colors, typography (Montserrat for title, Roboto Mono for prompt), title animation, prompt hover/focus effects (glow, expansion).
-*   **Task 1.3:** `Overture` client-side logic: manage visibility state, handle `[ BEGIN ]` click for site shell transition.
-*   **Task 1.4:** **NEW** Add "Skip Overture" option that appears after 3-second delay, styled to match the aesthetic (subtle opacity animation). Implement localStorage to remember returning visitors.
-*   **Task 1.5:** **NEW** Enhance `[ BEGIN ]` prompt with subtle pulse animation to improve engagement without compromising aesthetics.
+- [x] **Task 0.1:** Verify Docker setup (`Dockerfile`, `docker-compose.yml`, `start-services.sh`).
+    
+- [x] **Task 0.2:** Configure Tailwind CSS (`frontend/tailwind.config.ts`): theme values (colors, fonts from this document), custom utility classes for conversion elements.
+    
+- [x] **Task 0.3:** Global styles (`frontend/app/globals.css`): font imports, base body styles, SVG noise/grain background effect, conversion element base styles.
+    
+- [x] **Task 0.4:** Main Next.js layout (`frontend/app/layout.tsx`): metadata, fonts, global styles wrapper.
+    
+- [ ] **Task 0.5:** Simple analytics setup - add Vercel Analytics, Plausible, or similar lightweight solution to track conversion paths.
+    
+- [ ] **Task 0.6 (Optional):** Basic Directus collections (e.g., "Projects") for parallel backend work.
+    
 
----
+### 1. The Overture (Seed/Veil Phase) - Entry Sequence
 
-## Phase 2: The Unfurling (Transitions & Initial Site Structure) - Frontend with Wayfinding
+- [x] **Task 1.1:** `Overture.tsx` React component (`frontend/components/sections/Overture.tsx`): JSX for "Monolith Entry," title, `[ BEGIN ]` prompt.
+    
+- [x] **Task 1.2:** Style `Overture` with Tailwind: colors, typography (Montserrat for title, Roboto Mono for prompt), title animation, prompt hover/focus effects (glow, expansion).
+    
+- [x] **Task 1.3:** `Overture` client-side logic: manage visibility state, handle `[ BEGIN ]` click for site shell transition using Framer Motion.
+    
+- [x] **Task 1.4:** Add "Skip Overture" option: appears after 3-5 second delay, styled subtly, Framer Motion for fade-in. Implement `localStorage` to remember returning visitors for bypass.
+    
+- [x] **Task 1.5:** Enhance `[ BEGIN ]` prompt: subtle pulse animation using Framer Motion (`animate` prop with `repeat: Infinity, repeatType: "mirror"` on `scale` or `opacity`).
+    
 
-*   **Task 2.1:** `SiteShell` component (`frontend/components/core/SiteShell.tsx`): manages "Kinetic Canvases" display. Integrate with `Overture` in `frontend/app/page.tsx`.
-*   **Task 2.2:** `CuratorLensNav` component (`frontend/components/navigation/CuratorLensNav.tsx`): JSX for navigator icon & menu. Style with Tailwind (bottom-left, icon, menu hidden initially).
-*   **Task 2.3:** Overture to Site Shell Transition: Use Framer Motion for "breakthrough" animation with embedded value proposition text that emerges organically.
-*   **Task 2.4:** `CuratorLensNav` Logic: Toggle menu (icon animation '+' to 'X'), Framer Motion for staggered menu item appearance. Menu items trigger active canvas change. Icon pulse/shimmer.
-*   **Task 2.5:** **NEW** Add `PositionIndicator` component to show current location in the experience, styled as minimal aesthetic element.
-*   **Task 2.6:** **NEW** `ContactBeacon` component that persists across the experience, styled to match design language. Implement with useContext to control visibility based on current phase.
+### 2. Site Shell & Curator's Lens (Navigation) - Unfurling Phase
 
----
+- [x] **Task 2.1:** `SiteShell.tsx` component (`frontend/components/core/SiteShell.tsx`): manages visibility and Framer Motion transitions of "Kinetic Canvases." Integrate with `Overture` in `frontend/app/page.tsx` (likely using `AnimatePresence` from Framer Motion to handle `Overture`'s exit and `SiteShell`'s entry).
+    
+- [x] **Task 2.2:** `CuratorLensNav.tsx` component (`frontend/components/navigation/CuratorLensNav.tsx`): JSX for navigator icon & menu. Style with Tailwind (bottom-left, icon, menu hidden initially).
+    
+- [x] **Task 2.3:** Overture to Site Shell Transition: Use Framer Motion for the `SiteShell`'s `animate` prop (`opacity: 1, scale: 1`) and `transition` prop (syncing with `Overture`'s exit). Embed value proposition text that emerges organically during this transition.
+    
+- [x] **Task 2.4:** `CuratorLensNav` Logic:
+    
+    - Toggle menu visibility with `open` state.
+        
+    - Animate navigator icon (plus to cross) using Framer Motion `animate` prop based on `open` state. Implement orbiting dot effect with `motion.div` elements.
+        
+    - Framer Motion for staggered menu item appearance using `variants` as specified.
+        
+    - Menu items trigger active canvas change (update global state).
+        
+    - Icon pulse/shimmer on hover using `whileHover`.
+        
+- [x] **Task 2.5:** `PositionIndicator.tsx` component: displays current canvas (e.g., "I/V"). Style minimally. Framer Motion for subtle animation on change.
+    
+- [x] **Task 2.6:** `ContactBeacon.tsx` component: persistent, subtly styled button/icon. Use React Context/Zustand to control visibility/prominence based on "Emergence" phase. Framer Motion for animated appearance/disappearance.
+    
 
-## Phase 3: Kinetic Canvases & Core Content - Frontend with Conversion Elements
+### 3. Kinetic Canvases & Core Content - Bloom/Horizon Phase
 
-*   **Task 3.1:** Canvas Management: State for active "Kinetic Canvas" (React Context/Zustand/Jotai), updated by `CuratorLensNav`.
-*   **Task 3.2 (Optional):** `KineticCanvasWrapper` component for shared canvas transition logic/styling.
-*   **Task 3.3:** `HomeCanvas` component (`frontend/components/canvases/HomeCanvas.tsx`):
-  * Typographic statement, styled with Tailwind. Calm, spacious atmosphere.
-  * **NEW** Add concise value proposition statement that complements the artistic element.
-  * **NEW** Add primary CTA that feels like a natural part of the composition.
-*   **Task 3.4:** Inter-Canvas Transitions: Framer Motion (`perspective`, `rotateY`, `scale`, `translateZ`). Vary transition styles per "Emergence" theme.
-  * **NEW** Add subtle loading indicators styled as artistic elements.
-  * **NEW** Optimize transitions for reduced waiting time.
-*   **Task 3.5:** `PortfolioCanvas` component (`frontend/components/canvases/PortfolioCanvas.tsx`):
-  * Layout for project items (Tailwind grid/flex). Style items (`mix-blend-mode: luminosity`, hover effects).
-  * **NEW** Add elegant filtering options for projects (styled to match aesthetic).
-  * **NEW** Enhance project cards with clear information and subtle CTAs.
-*   **Task 3.6:** `ProjectDetailCanvas`:
-  * Dynamic route (e.g., `frontend/app/portfolio/[slug]/page.tsx`) or modal. Focused layout for project details.
-  * **NEW** Add "Next Steps" section and "Discuss This Project" CTA.
-  * **NEW** Add related projects component to encourage continued exploration.
-*   **Task 3.7:** `ServicesCanvas`:
-  * Content structure and Tailwind styling for "Confident Expression."
-  * **NEW** Enhance service descriptions for clarity while maintaining aesthetic.
-  * **NEW** Add "Process" insights and service-specific CTAs.
-*   **Task 3.8:** `JournalCanvas`:
-  * Structure and styling for journal entries.
-  * **NEW** Add newsletter signup or content alert option styled to match the aesthetic.
-*   **Task 3.9:** `ContactCanvas`:
-  * **NEW** Streamlined form with minimal required fields.
-  * **NEW** Add subtle "response time" indicator.
-  * **NEW** Include alternative contact methods.
-*   **Task 3.10:** General Phase 3 Styling: Consistent color palette, typography. Microinteractions (hovers, subtle animations). Optional digital dust/particles.
-  * **NEW** Enhanced hover/focus states for conversion elements.
-  * **NEW** Subtle cursor changes near interactive elements.
+- [x] **Task 3.1:** Canvas Management: Global state (React Context/Zustand/Jotai) for `activeCanvasId`. `SiteShell.tsx` uses this to render only the active canvas within `AnimatePresence`.
+    
+- [ ] **Task 3.2 (Optional):** `KineticCanvasWrapper.tsx` component: `motion.section` that takes `isActive` prop and handles its own `initial`, `animate`, `exit`, `transition` props for shared canvas transition logic (perspective, rotateY, scale, translateZ).
+    
+- [x] **Task 3.3:** `HomeCanvas.tsx` component (`frontend/components/canvases/HomeCanvas.tsx`):
+    
+    - Dominant typographic statement, subtitle. Style with Tailwind.
+        
+    - Integrate concise value proposition.
+        
+    - Primary CTA (`.canvas-action-link` style): Framer Motion for hover (letter-spacing, underline reveal).
+        
+- [x] **Task 3.4:** Inter-Canvas Transitions: Ensure `AnimatePresence` wraps the active canvas in `SiteShell.tsx`. Define `initial`, `animate`, `exit` props on each canvas component (or `KineticCanvasWrapper`) as specified (perspective, rotateY, scale, translateZ). Vary transition subtleties (speed, intensity) based on "Emergence" phase using dynamic `transition` props.
+    
+    - Implement subtle, artistic loading indicators (e.g., pulsing line) using Framer Motion during canvas transitions or data fetching.
+        
+    - Optimize transitions for perceived speed and smoothness.
+        
+- [x] **Task 3.5:** `PortfolioCanvas.tsx` component (`frontend/components/canvases/PortfolioCanvas.tsx`):
+    
+    - Layout: `portfolio-space` div uses flexbox (`flex-grow: 1` within a flex-column `.canvas-content-wrapper` that has `height: 100%`).
+        
+    - Project Items (`ProjectSculpture.tsx`):
+        
+        - Each item is `motion.div`.
+            
+        - Placement & Initial Animation: Implement `arrangePortfolioItems` JS logic. Pass initial transform values as props to `ProjectSculpture.tsx` and use in `initial` prop. Animate to final position using `animate` prop.
+            
+        - Hover: `whileHover={{ scale: 1.05, zIndex: 10, boxShadow: "..." }}`. Image `mix-blend-mode` change. Project info overlay animates with Framer Motion (`initial={{ y: "100%" }} whileHover={{ y: "0%" }}`).
+            
+    - Filtering: If implemented, use Framer Motion's `layout` prop on `portfolio-space` and `layoutId` on items for animated reordering. Style filters elegantly.
+        
+    - Conversion: Clear titles, enticing visuals. "Discover ->" link as micro-CTA.
+        
+- [x] **Task 3.6:** `ProjectDetailCanvas.tsx`:
+    
+    - Dynamic route (`frontend/app/portfolio/[slug]/page.tsx`) or modal. If modal, use Framer Motion for entry/exit.
+        
+    - Focused layout, high-quality imagery.
+        
+    - Conversion: "Next Steps" section, "Discuss This Project" CTA. Related projects component with Framer Motion for item appearance.
+        
+- [x] **Task 3.7:** `ServicesCanvas.tsx`:
+    
+    - Content structure and Tailwind styling.
+        
+    - Framer Motion for subtle entrance animations of content blocks (staggered `initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}`).
+        
+    - Conversion: Clear value, process insights, service-specific CTAs.
+        
+- [x] **Task 3.8:** `JournalCanvas.tsx`:
+    
+    - Structure and styling. Framer Motion for content block entrances.
+        
+    - Conversion: Minimalist newsletter signup form or "Follow for insights" CTA.
+        
+- [x] **Task 3.9:** `ContactCanvas.tsx`:
+    
+    - Streamlined form. Framer Motion for field/button appearances.
+        
+    - Conversion: "Response time" indicator. Alternative contact methods.
+        
+- [x] **Task 3.10:** General Phase 3 Styling & Microinteractions:
+    
+    - Consistent color palette, typography.
+        
+    - Implement `ParticleAccent.tsx` component using Framer Motion for individual particle animation.
+        
+    - Enhanced hover/focus states for conversion elements using `whileHover`, `whileFocus`.
+        
+    - Subtle cursor changes (CSS `cursor` property, or custom cursor with Framer Motion if ambitious) near interactive elements.
+        
 
----
+### 4. Directus Backend & Integration
 
-## Phase 4: Directus Backend Development with Conversion Tracking
+- [ ] **Task 4.1:** Define Directus Collections: "Projects" (title, slug, description, images, tech_stack array, live_url, repo_url, case_study_content, optional layout fields like `initialX`, `initialY`), "JournalEntries" (title, slug, content_rich_text, publication_date, featured_image_url, tags array), "Services" (title, description_rich_text, icon_url), "ConversionActions" (action_type, submitted_data, timestamp).
+    
+- [ ] **Task 4.2:** Add "Conversion Actions" collection to track form submissions and key engagement points.
+    
+- [ ] **Task 4.3:** Configure Directus Roles & Permissions: Public read-only for published content, admin CUD.
+    
+- [ ] **Task 4.4:** Populate Directus with initial sample content.
+    
+- [ ] **Task 4.5:** Implement custom Directus extensions (hooks, endpoints) if needed (e.g., for complex queries or processing form data before saving).
+    
+- [ ] **Task 4.6:** Set up Directus Flows for handling form submissions (e.g., from ContactCanvas) and sending email notifications.
+    
 
-*   **Task 4.1:** Define Directus Collections: "Projects" (title, desc, images, tech, URL, etc.), "Journal Entries" (title, slug, content, date, image, tags), "Services" (title, desc, icon). Optional "General Site Info."
-*   **Task 4.2:** **NEW** Add "Conversion Actions" collection to track form submissions and engagement.
-*   **Task 4.3:** Configure Directus Roles & Permissions for public access.
-*   **Task 4.4:** Populate Directus with initial sample content for frontend development.
-*   **Task 4.5:** Implement any custom Directus extensions (hooks, endpoints) if needed for complex data queries or logic.
-*   **Task 4.6:** **NEW** Set up Directus Flows for handling form submissions and contact requests.
+### 5. Frontend-Backend Integration
 
----
+- [ ] **Task 5.1:** Fetch data from Directus API in Next.js (Server Components for initial data, client-side fetching with SWR/React Query for dynamic updates if needed).
+    
+    - Portfolio items for `PortfolioCanvas` and `ProjectDetailCanvas` (fetching `initialX`, `initialY` if stored in Directus).
+        
+    - Journal entries for `JournalCanvas`.
+        
+    - Services content for `ServicesCanvas`.
+        
+- [ ] **Task 5.2:** Implement dynamic routing in Next.js for `ProjectDetailCanvas` (`/portfolio/[slug]`) and individual journal entry pages.
+    
+- [ ] **Task 5.3:** Handle image rendering from Directus using Next.js `<Image>` component. Construct asset URLs: `DIRECTUS_URL/assets/IMAGE_ID`.
+    
+- [ ] **Task 5.4:** Contact form submission: Next.js API Route sends data to Directus (custom endpoint or SDK to create item in "ConversionActions" / trigger Flow).
+    
+- [x] **Task 5.5:** Implement form validation (e.g., using React Hook Form) with elegant error states styled with Tailwind and animated with Framer Motion (e.g., gentle shake).
+    
+- [ ] **Task 5.6:** Create success/confirmation states for form submissions: animated messages using Framer Motion that fit the "Emergence" narrative (e.g., a gentle unfolding confirmation).
+    
 
-## Phase 5: Frontend-Backend Integration with Conversion Handling
+### 6. "Emergence" Theme Implementation with Framer Motion
 
-*   **Task 5.1:** Fetch data from Directus API in Next.js components/pages (e.g., using `fetch`, SWR, or React Query with Bun's fetch).
-  *   Portfolio items for `PortfolioCanvas` and `ProjectDetailCanvas`.
-  *   Journal entries for `JournalCanvas`.
-  *   Services content for `ServicesCanvas`.
-*   **Task 5.2:** Implement dynamic routing in Next.js for detailed project/journal views based on slugs from Directus.
-*   **Task 5.3:** Handle image rendering from Directus (using Next.js `<Image>` component if possible, ensuring correct Directus asset URLs).
-*   **Task 5.4:** Set up contact form submission (if `ContactCanvas` has a form) to a Directus endpoint/flow or a third-party service.
-*   **Task 5.5:** **NEW** Implement form validation with elegant error states that match the design language.
-*   **Task 5.6:** **NEW** Create success/confirmation states for all conversion actions with animations that fit the "Emergence" narrative.
+- [x] **Task 6.1:** Implement "Emergence" Narrative Arc details with conversion moments:
+    
+    - **Phase 1 (Seed/Veil - Overture):** Darker tones, slower Framer Motion animations. Skip option for returning visitors.
+        
+    - **Phase 2 (Growth/Unfurling - Transitions & Early Canvases):** Framer Motion transitions show layers peeling, spaces opening. Gradual illumination (can be managed by passing phase prop to components and adjusting styles/variants). Emerging value proposition text animated during transitions.
+        
+    - **Phase 3 (Bloom/Horizon - Main Canvases):** Brighter, spacious, confident. Framer Motion interactions are polished. Clear conversion pathways integrated.
+        
+- [x] **Task 6.2:** Implement Subtle Accents (Cyberpunk, Old Money) as per this document, ensuring they support the "Emergence" theme.
+    
+- [x] **Task 6.3:** Animation Control & Variation: Use a global state (React Context/Zustand) for `currentEmergencePhase` ("seed", "growth", "bloom"). Framer Motion `variants` for elements (particles, glows, text styles, animation speeds) change based on this `currentEmergencePhase`.
+    
+- [x] **Task 6.4:** Light as a Metaphor: Control `text-shadow`, `box-shadow`, background subtleties via CSS variables updated by JS based on phase, or directly in Framer Motion `animate` props.
+    
+- [x] **Task 6.5:** `ContactBeacon` behavior: Framer Motion to animate changes in visibility/prominence based on `currentEmergencePhase`.
+    
+- [x] **Task 6.6:** Guided Pathways: Subtle animated lines (`motion.svg` paths) or particle flows (Framer Motion `motion.div` arrays) appearing in Phase 3 to guide towards CTAs.
+    
 
----
+### 7. Refinements, Testing, Optimization & Conversion Focus
 
-## Phase 6: Refinements & "Emergence" Theme Implementation with Conversion Path
+- [ ] **Task 7.1:** Accessibility Review (WCAG 2.1 AA): Test all Framer Motion interactions for keyboard accessibility. Ensure focus management with canvas system. Check color contrasts. Use ARIA attributes.
+    
+- [ ] **Task 7.2:** Performance Optimization:
+    
+    - Use `motion.custom` with dynamic `variants` where appropriate for Framer Motion.
+        
+    - Utilize Framer Motion's `LazyMotion` and feature imports (e.g., `domAnimation`, `domMax`) to reduce bundle size.
+        
+    - Optimize `layout` prop usage. Ensure hardware acceleration (`transform`, `opacity`).
+        
+    - Next.js `<Image>` for image optimization. Code splitting. Bundle analysis (`@next/bundle-analyzer`).
+        
+    - Implement priority loading for conversion-critical elements (e.g., ensure CTAs are interactive quickly).
+        
+    - Add skeleton loaders (styled artistically, can be animated with Framer Motion) for data-heavy sections.
+        
+- [ ] **Task 7.3:** Cross-browser & Responsiveness Testing:
+    
+    - Test on major browsers. Ensure design adapts gracefully (e.g., "Sculpted Gallery" may simplify to a stacked/single-column layout on mobile, animated with Framer Motion).
+        
+    - Test mobile touch targets for conversion elements.
+        
+    - Verify mobile performance of Framer Motion animations.
+        
+- [ ] **Task 7.4:** Conversion Path Testing:
+    
+    - Set up heatmaps (e.g., Hotjar, Clarity) if possible.
+        
+    - Test form completion rates.
+        
+    - Verify analytics tracking of key conversion points (CTA clicks, form submissions).
+        
+- [ ] **Task 7.5:** A/B Testing Setup for Conversion Elements:
+    
+    - Implement lightweight framework (e.g., conditional rendering based on a flag/segment) for testing variations of CTAs or value propositions.
+        
+    - Track comparison data in analytics or Directus "Conversion Actions".
+        
+- [ ] **Task 7.6:** Final Review against this specification document.
+    
+- [ ] **Task 7.7:** Build final Docker images for production.
+    
+- [ ] **Task 7.8:** Deploy to chosen hosting platform.
+    
 
-*   **Task 6.1:** Implement "Emergence" Narrative Arc details with conversion moments:
-  *   **Phase 1 (Seed/Veil):** Ensure Overture embodies introspection, contained potential. Darker tones, slower animations. Skip option for returning visitors.
-  *   **Phase 2 (Growth/Unfurling):** Transitions show breaking through, gradual illumination. Canvas transitions peel back layers, open spaces. Emerging value proposition during transitions.
-  *   **Phase 3 (Bloom/Horizon):** Main canvases are bright, spacious, confident. Interactions polished. Clear conversion pathways integrated.
-*   **Task 6.2:** Implement Subtle Accents (Cyberpunk, Old Money) as per `Portfolio.md`, ensuring they support the "Emergence" theme.
-*   **Task 6.3:** Animation Control & Variation: Ensure Framer Motion animations dynamically reflect the current "Emergence" phase (e.g., speed, intensity of light/particles).
-*   **Task 6.4:** Light as a Metaphor: Systematically use light (simulated via colors, glows, highlights with Tailwind) to convey the journey.
-*   **Task 6.5:** **NEW** Implement "Contact Beacon" behavior across all phases, ensuring it feels integrated with the design.
-*   **Task 6.6:** **NEW** Add subtle "guided pathways" (thin lines, gentle gradients, or particle concentrations) that intuitively guide users toward conversion elements.
+### 8. Post-Launch Optimization
 
----
+- [ ] **Task 8.1:** Set up monitoring for conversion metrics and user journeys using analytics.
+    
+- [ ] **Task 8.2:** Plan for iterative improvements based on analytics data and A/B test results.
+    
+- [ ] **Task 8.3:** Develop A/B testing schedule for ongoing conversion optimization.
+    
 
-## Phase 7: Testing, Optimization & Deployment with Conversion Focus
+### Appendix A: Current CSS Debugging Focus (As of 2025-05-15)
 
-*   **Task 7.1:** Accessibility Review (WCAG compliance): Color contrasts, keyboard navigation, ARIA attributes. Ensure conversion elements are accessible.
-*   **Task 7.2:** Performance Optimization:
-  * Image optimization (Next.js `<Image>`), code splitting, lazy loading. Bundle size analysis.
-  * **NEW** Implement priority loading for conversion-critical elements.
-  * **NEW** Add skeleton loaders styled to match the aesthetic.
-*   **Task 7.3:** Cross-browser & Responsiveness Testing:
-  * Test on major browsers. Ensure design is responsive or degrades gracefully.
-  * **NEW** Test mobile touch targets for conversion elements.
-  * **NEW** Verify mobile performance of animations and transitions.
-*   **Task 7.4:** **NEW** Conversion Path Testing:
-  * Set up heatmaps to analyze user interaction with conversion elements.
-  * Test form completion rates and adjust if necessary.
-  * Verify analytics tracking of key conversion points.
-*   **Task 7.5:** **NEW** A/B Testing Setup for Conversion Elements:
-  * Implement lightweight framework for testing subtle variations of conversion elements.
-  * Set up tracking for comparison data.
-*   **Task 7.6:** Final Review against updated `Portfolio.md` specifications.
-*   **Task 7.7:** Build final Docker images for production.
-*   **Task 7.8:** Deploy to chosen hosting platform.
+_This section was part of the original `plan.md` and is retained for context if the AI agent needs to be aware of past debugging efforts. It should be reviewed to ensure these specific issues are resolved or no longer relevant._
 
----
-
-## Phase 8: Post-Launch Optimization
-
-*   **Task 8.1:** **NEW** Set up monitoring for conversion metrics and user journeys.
-*   **Task 8.2:** **NEW** Plan for iterative improvements based on analytics data.
-*   **Task 8.3:** **NEW** Develop A/B testing schedule for ongoing conversion optimization.
+- [x] **Verify Tailwind CSS Output File**:
+    
+    - Locate and inspect the actual CSS file generated by Tailwind/Next.js (typically found within the `.next/static/css/` directory during development).
+        
+    - Confirm that utility classes like `.bg-red-500 { ... }` or `.flex { display: flex; }` are present in the generated bundle and that their CSS properties are correct. This will determine if the issue is in generation or application.
+        
+- [x] **Browser Developer Tools Deep Dive**:
+    
+    - Intensively use the browser's element inspector on the affected elements (e.g., the main `div` in `HomeCanvas`, the `body` tag).
+        
+    - Pay close attention to the "Computed" styles tab to see precisely which styles are winning and their origin.
+        
+    - Systematically disable CSS rules in the "Styles" or "Rules" panel to identify any unexpected overrides, even from browser default styles or extensions (though less likely for such fundamental properties).
+        
+    - Look for any inherited styles with unusual specificity or `!important` flags.
+        
+- [x] **Extreme Simplification Test**:
+    
+    - Create a new, minimal Next.js page (e.g., `app/test-tailwind/page.tsx`) with only the most basic HTML structure (e.g., `<html><body><div>Hello</div></body></html>`).
+        
+    - Apply a single Tailwind background class (e.g., `bg-green-500`) and a flex class to the div.
+        
+    - If this works, incrementally reintroduce elements from the main `app/layout.tsx` and `app/page.tsx` (like the specific `html` and `body` classes, `main` tag, `AnimatePresence`, etc.) to pinpoint when the styling breaks.
+        
+- [x] **Scrutinize `globals.css` Again**:
+    
+    - Despite previous cleanups, re-examine every rule in `globals.css` for any subtle, overly broad selectors (e.g., attribute selectors, universal selectors `*`) that might be unintentionally resetting or interfering with background or display properties.
+        
+- [x] **Check for Other Global Style Injections**:
+    
+    - Ensure no third-party libraries or scripts are injecting global CSS that could conflict. Review `useEffect` hooks or component libraries that might have this side effect.
+        
+- [x] **Project Dependencies and Cache**:
+    
+    - If the above steps yield no solution, consider deleting `node_modules`, `.next` folder, and `package-lock.json`/`yarn.lock`, then running `npm install` (or `yarn`) to ensure a completely fresh build environment.
+        
+    - Check the current Next.js version for any known, relevant bugs filed on its issue tracker.

@@ -3,10 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import MainLayout from '../../components/layout/MainLayout';
-import ServicesCanvas from '@/components/canvases/ServicesCanvas';
+import AboutCanvas from '@/components/canvases/AboutCanvas';
 import { useEmergence } from '@/context/EmergenceContext';
 
-export default function ServicesPage() {
+export default function AboutPage() {
   const { currentPhase } = useEmergence();
   
   // Phase-specific page transition animation
@@ -42,7 +42,7 @@ export default function ServicesPage() {
         exit="exit"
         variants={pageVariants}
       >
-        <ServicesCanvas />
+        <AboutCanvas />
       </motion.div>
     </MainLayout>
   );

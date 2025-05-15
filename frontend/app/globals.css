@@ -2,53 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300&family=Montserrat:wght@200;300;400&family=Roboto+Mono:wght@400&display=swap'); */
+/* 
+ * Aethelframe Protocol - Emergence Theme Global Styles
+ * Font imports are handled by Next.js Font API in layout.tsx
+ */
 
 :root {
-  /* Design Tokens from Mockup */
+  /* Core Design Tokens */
   --bg-color: #070707; 
   --text-color: #A0A0A0; 
   --primary-accent: #0073E6; 
-  --secondary-accent: #50E3C2; 
-  --highlight-color: #FFFFFF; 
-
+  --secondary-accent: #50E3C2;
+  --tertiary-accent: #F0C3FF;
+  --highlight-color: #FFFFFF;
+  
+  /* Emergence Phase-specific Design Tokens */
+  --seed-bg: #050505;
+  --seed-text: #707070;
+  --seed-accent: #293D5C;
+  
+  --growth-bg: #0F0F0F;
+  --growth-text: #B0B0B0;
+  --growth-accent: #0062C4;
+  
+  --bloom-bg: #121212;
+  --bloom-text: #D0D0D0;
+  --bloom-accent: #0073E6;
+  
+  /* Typography */
   --font-body: 'Inter', sans-serif;
   --font-heading: 'Montserrat', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
-
+  
+  /* Animation Variables */
   --transition-duration-epic: 2s;
   --transition-duration-slow: 1.5s;
   --transition-duration-medium: 0.9s;
   --transition-duration-fast: 0.6s;
+  --transition-duration-quick: 0.3s;
   --easing-curve-display: cubic-bezier(0.83, 0, 0.17, 1);
   --easing-curve-interactive: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-curve-emergence: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-curve-bloom: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Base HTML/Body Styles */
 html {
   height: 100%;
-  overflow-x: hidden; /* Match body's overflow behavior from mockup for html too */
+  overflow-x: hidden;
+  background-color: var(--bg-color);
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--bg-color);
   color: var(--text-color);
-  overflow: hidden; /* As per mockup */
-  font-weight: 200; /* As per mockup */
+  overflow: hidden;
+  font-weight: 200;
   margin: 0;
   padding: 0;
   height: 100vh;
   width: 100vw;
+  position: relative;
+  
+  /* SVG Noise Background Effect */
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    z-index: -1;
+  }
 }
 
-/* Custom Scrollbar from Mockup */
+/* Custom Scrollbar */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg-color); }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 1.5px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-accent); }
 
-
-/* Global centering fix - kept from original, review later */
+/* Global Next.js Layout Setup */
 #__next, main {
   display: flex;
   flex-direction: column;
@@ -56,7 +94,7 @@ body {
   width: 100%;
 }
 
-/* Font utility classes - kept, but Tailwind theme fonts are preferred */
+/* Font utility classes */
 .font-montserrat {
   font-family: var(--font-heading);
 }
@@ -69,16 +107,90 @@ body {
   font-family: var(--font-mono);
 }
 
-@layer utilities {
-  .shadow-custom-subtle {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.08);
+/* Phase-specific body classes for Emergence theme */
+body.phase-seed {
+  background-color: var(--seed-bg);
+  color: var(--seed-text);
+  
+  &::before {
+    opacity: 0.015; /* Reduced noise in Seed phase */
   }
 }
 
-/* Particle Animation from Mockup */
+body.phase-growth {
+  background-color: var(--growth-bg);
+  color: var(--growth-text);
+  
+  &::before {
+    opacity: 0.025; /* Medium noise in Growth phase */
+  }
+}
+
+body.phase-bloom {
+  background-color: var(--bloom-bg);
+  color: var(--bloom-text);
+  
+  &::before {
+    opacity: 0.035; /* Full noise in Bloom phase */
+  }
+}
+
+/* Conversion Element Base Styles */
+@layer components {
+  .cta-primary {
+    @apply bg-primary-accent text-white font-mono text-sm tracking-wide py-3 px-6 
+           inline-flex items-center justify-center transition-all duration-fast 
+           hover:bg-primary-accent-dark hover:shadow-cta focus:outline-none 
+           focus:ring-2 focus:ring-primary-accent focus:ring-offset-2 focus:ring-offset-brand-bg;
+  }
+  
+  .cta-secondary {
+    @apply bg-transparent text-secondary-accent border border-secondary-accent 
+           font-mono text-sm tracking-wide py-3 px-6 inline-flex items-center 
+           justify-center transition-all duration-fast hover:bg-cta-subtle 
+           focus:outline-none focus:ring-2 focus:ring-secondary-accent;
+  }
+  
+  .cta-minimal {
+    @apply bg-transparent text-brand-text border-b border-gray-800 
+           font-mono text-xs tracking-wide py-1 px-3 inline-flex items-center 
+           justify-center transition-all duration-fast hover:text-white 
+           hover:border-white focus:outline-none;
+  }
+  
+  .canvas-action-link {
+    @apply inline-block font-mono text-sm tracking-wide text-primary-accent
+           relative after:absolute after:bottom-0 after:left-0 after:w-0
+           after:h-px after:bg-primary-accent hover:text-white
+           after:transition-all after:duration-medium hover:after:w-full
+           focus:outline-none focus:text-white focus:after:w-full;
+  }
+  
+  .beacon {
+    @apply w-2 h-2 rounded-full bg-secondary-accent animate-pulse-medium;
+  }
+  
+  .indicator {
+    @apply inline-flex items-center justify-center text-xs font-mono text-brand-text;
+  }
+}
+
+/* Canvas Base Styles */
+.canvas {
+  @apply w-full h-full flex flex-col opacity-0;
+  will-change: transform, opacity;
+}
+
+.canvas-content-wrapper {
+  @apply flex-grow flex flex-col items-start justify-start p-8 md:p-12 lg:p-16;
+  max-width: 100vw;
+  height: 100%;
+}
+
+/* Particle Animation */
 @keyframes driftAndFade {
   0%, 100% { opacity: 0; transform: translate(var(--x-start), var(--y-start)) scale(0.5); }
-  50% { opacity: 0.05; /* Very faint */ transform: translate(var(--x-end), var(--y-end)) scale(1); }
+  50% { opacity: 0.05; transform: translate(var(--x-end), var(--y-end)) scale(1); }
 }
 
 /* Keyframes for Overture/Monolith Entry */
@@ -88,4 +200,46 @@ body {
 
 @keyframes fadeInMonolithPrompt {
   to { opacity: 0.5; }
+}
+
+/* Shimmer Effect for Bloom phase elements */
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Form Element Styling */
+.form-input {
+  @apply bg-transparent border border-gray-800 text-brand-text font-mono text-sm 
+         w-full p-3 transition-colors duration-fast focus:border-primary-accent 
+         focus:outline-none;
+}
+
+.form-label {
+  @apply font-mono text-xs text-brand-text mb-1 block;
+}
+
+.form-error {
+  @apply font-mono text-xs text-red-500 mt-1;
+}
+
+/* Accessibility - respect user preferences */
+@media (prefers-reduced-motion) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .shimmer-bg {
+    animation: none !important;
+    background: transparent !important;
+  }
 }

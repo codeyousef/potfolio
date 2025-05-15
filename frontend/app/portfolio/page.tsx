@@ -1,19 +1,179 @@
 import React from 'react';
-import Image from 'next/image';
-import { getProjects } from '../../lib/api';
 import MainLayout from '../../components/layout/MainLayout';
-import ProjectCard from '../../components/ui/ProjectCard';
-import CanvasTransition from '../../components/layout/CanvasTransition';
+import PortfolioCanvas from '@/components/canvases/PortfolioCanvas';
 
+// We'll replace the direct API calls with a data fetcher function that works with Directus
 async function getPortfolioData() {
-  // Fetch projects from Strapi with population of relationships
-  const projects = await getProjects({
-    populate: ['coverImage', 'categories', 'services'],
-    sort: ['createdAt:desc'],
-  });
+  // In a production environment, this would fetch from Directus CMS
+  // For now, we'll return mock data that matches our expected format
+  
+  // This structure mimics what we'd expect from Directus
+  const mockProjects = [
+    {
+      id: '1',
+      attributes: {
+        title: 'Modern E-commerce Platform',
+        slug: 'modern-ecommerce',
+        description: 'A cutting-edge e-commerce solution with headless architecture',
+        galleryImages: {
+          data: [
+            {
+              attributes: {
+                url: '/images/projects/ecommerce.jpg',
+                width: 1200,
+                height: 800,
+                alternativeText: 'E-commerce platform showcase'
+              }
+            }
+          ]
+        },
+        categories: {
+          data: [
+            {
+              id: '1',
+              attributes: {
+                name: 'Web Development',
+                slug: 'web-development'
+              }
+            },
+            {
+              id: '2',
+              attributes: {
+                name: 'UI/UX Design',
+                slug: 'ui-ux-design'
+              }
+            }
+          ]
+        },
+        services: {
+          data: [
+            {
+              id: '1',
+              attributes: {
+                title: 'Frontend Development',
+                slug: 'frontend-development'
+              }
+            },
+            {
+              id: '2',
+              attributes: {
+                title: 'Design System',
+                slug: 'design-system'
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      id: '2',
+      attributes: {
+        title: 'Financial Dashboard',
+        slug: 'financial-dashboard',
+        description: 'Interactive data visualization for financial analytics',
+        galleryImages: {
+          data: [
+            {
+              attributes: {
+                url: '/images/projects/dashboard.jpg',
+                width: 1200,
+                height: 800,
+                alternativeText: 'Financial dashboard interface'
+              }
+            }
+          ]
+        },
+        categories: {
+          data: [
+            {
+              id: '1',
+              attributes: {
+                name: 'Web Development',
+                slug: 'web-development'
+              }
+            },
+            {
+              id: '3',
+              attributes: {
+                name: 'Data Visualization',
+                slug: 'data-visualization'
+              }
+            }
+          ]
+        },
+        services: {
+          data: [
+            {
+              id: '3',
+              attributes: {
+                title: 'Interactive Visualization',
+                slug: 'interactive-visualization'
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      id: '3',
+      attributes: {
+        title: 'Minimalist Publishing Platform',
+        slug: 'minimalist-publishing',
+        description: 'Clean, distraction-free platform for writers and creators',
+        galleryImages: {
+          data: [
+            {
+              attributes: {
+                url: '/images/projects/publishing.jpg',
+                width: 1200,
+                height: 800,
+                alternativeText: 'Publishing platform preview'
+              }
+            }
+          ]
+        },
+        categories: {
+          data: [
+            {
+              id: '1',
+              attributes: {
+                name: 'Web Development',
+                slug: 'web-development'
+              }
+            },
+            {
+              id: '4',
+              attributes: {
+                name: 'Content Management',
+                slug: 'content-management'
+              }
+            }
+          ]
+        },
+        services: {
+          data: [
+            {
+              id: '4',
+              attributes: {
+                title: 'CMS Development',
+                slug: 'cms-development'
+              }
+            },
+            {
+              id: '5',
+              attributes: {
+                title: 'User Experience Design',
+                slug: 'ux-design'
+              }
+            }
+          ]
+        }
+      }
+    }
+  ];
   
   return {
-    projects: projects.data,
+    projects: mockProjects,
   };
 }
 
@@ -22,56 +182,7 @@ export default async function PortfolioPage() {
   
   return (
     <MainLayout>
-      <CanvasTransition isVisible={true} phase="growth">
-        <div className="mb-16">
-          <h1 className="font-montserrat font-light text-4xl md:text-5xl text-center tracking-wide mt-12 mb-2">
-            Atelier
-          </h1>
-          <p className="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
-            A curated collection of projects that embody the Emergence aesthetic, 
-            where design, technology, and narrative converge.
-          </p>
-          
-          {/* Projects grid */}
-          {projects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
-              {projects.map((project, index) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={{
-                    id: project.id,
-                    title: project.attributes.title,
-                    slug: project.attributes.slug,
-                    description: project.attributes.description || '',
-                    coverImage: {
-                      url: project.attributes.galleryImages?.data?.[0]?.attributes?.url || '/placeholder-project.jpg',
-                      width: project.attributes.galleryImages?.data?.[0]?.attributes?.width || 1200,
-                      height: project.attributes.galleryImages?.data?.[0]?.attributes?.height || 800,
-                      alternativeText: project.attributes.galleryImages?.data?.[0]?.attributes?.alternativeText || project.attributes.title
-                    },
-                    categories: project.attributes.categories?.data?.map(cat => ({
-                      id: cat.id,
-                      name: cat.attributes.name,
-                      slug: cat.attributes.slug
-                    })) || [],
-                    services: project.attributes.services?.data?.map(service => ({
-                      id: service.id,
-                      title: service.attributes.title,
-                      slug: service.attributes.slug
-                    })) || []
-                  }}
-                  index={index}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 bg-gray-900 rounded-sm p-8 mt-8">
-              <p className="text-gray-400 font-['Roboto_Mono'] text-sm">No projects found</p>
-              <p className="text-gray-500 text-xs mt-2">Projects will appear here once added to your CMS</p>
-            </div>
-          )}
-        </div>
-      </CanvasTransition>
+      <PortfolioCanvas projects={projects} />
     </MainLayout>
   );
 }
