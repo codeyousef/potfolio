@@ -59,8 +59,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${montserrat.variable} ${robotoMono.variable}`}>
-      <body className="font-sans bg-brand-bg text-brand-text">
-        <EmergenceProvider>
+      <EmergenceProvider>
+        <body className="font-sans bg-brand-bg text-brand-text">
           {children}
           <Analytics />
         </EmergenceProvider>

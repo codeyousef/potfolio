@@ -39,7 +39,7 @@ Objective: To provide a detailed specification for AI coding agents to implement
     
 - [x] **Task 0.4:** Main Next.js layout (`frontend/app/layout.tsx`): metadata, fonts, global styles wrapper.
     
-- [ ] **Task 0.5:** Simple analytics setup - add Vercel Analytics, Plausible, or similar lightweight solution to track conversion paths.
+- [x] **Task 0.5:** Simple analytics setup - add Vercel Analytics, Plausible, or similar lightweight solution to track conversion paths.
     
 - [ ] **Task 0.6 (Optional):** Basic Directus collections (e.g., "Projects") for parallel backend work.
     
@@ -159,18 +159,17 @@ Objective: To provide a detailed specification for AI coding agents to implement
 
 ### 4. Directus Backend & Integration
 
-- [ ] **Task 4.1:** Define Directus Collections: "Projects" (title, slug, description, images, tech_stack array, live_url, repo_url, case_study_content, optional layout fields like `initialX`, `initialY`), "JournalEntries" (title, slug, content_rich_text, publication_date, featured_image_url, tags array), "Services" (title, description_rich_text, icon_url), "ConversionActions" (action_type, submitted_data, timestamp).
+- [x] **Task 4.1:** Define Directus Collections: "Projects" (title, slug, description, images, tech_stack array, live_url, repo_url, case_study_content, optional layout fields like `initialX`, `initialY`), "JournalEntries" (title, slug, content_rich_text, publication_date, featured_image_url, tags array), "Services" (title, description_rich_text, icon_url), "ConversionActions" (action_type, submitted_data, timestamp).
     
-- [ ] **Task 4.2:** Add "Conversion Actions" collection to track form submissions and key engagement points.
+- [x] **Task 4.2:** Add "Conversion Actions" collection to track form submissions and key engagement points.
     
-- [ ] **Task 4.3:** Configure Directus Roles & Permissions: Public read-only for published content, admin CUD.
+- [x] **Task 4.3:** Configure Directus Roles & Permissions: Public read-only for published content, admin CUD.
     
-- [ ] **Task 4.4:** Populate Directus with initial sample content.
+- [x] **Task 4.4:** Populate Directus with initial sample content.
     
-- [ ] **Task 4.5:** Implement custom Directus extensions (hooks, endpoints) if needed (e.g., for complex queries or processing form data before saving).
+- [~] **Task 4.5:** Implement custom Directus extensions (hooks, endpoints) if needed (e.g., for complex queries or processing form data before saving). *(Deferred - will re-evaluate if SDK via Next.js API routes is insufficient)*
     
-- [ ] **Task 4.6:** Set up Directus Flows for handling form submissions (e.g., from ContactCanvas) and sending email notifications.
-    
+- [~] **Task 4.6:** Set up Directus Flows for handling form submissions (e.g., from ContactCanvas) and sending email notifications. *(Deferred)*
 
 ### 5. Frontend-Backend Integration
 
