@@ -45,7 +45,13 @@ services:
 
       # Explicit CORS Configuration
       CORS_ENABLED: 'true'
-      CORS_ORIGIN: 'http://localhost:8080'
+      CORS_ORIGIN: 'http://localhost:8080,http://localhost:8055,http://localhost:3000,http://127.0.0.1:8080,http://127.0.0.1:8055,http://127.0.0.1:3000'
+      CORS_METHODS: 'GET,POST,PATCH,DELETE,OPTIONS,PUT,HEAD'
+      CORS_ALLOWED_HEADERS: 'Content-Type,Authorization,X-Requested-With,Origin,Accept,Content-Range,Content-Disposition,Content-Length,Range,Access-Control-Allow-Origin,Access-Control-Allow-Credentials'
+      CORS_EXPOSED_HEADERS: 'Content-Range,X-Total-Count,Content-Length,Content-Type,Content-Disposition,Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Credentials'
+      CORS_CREDENTIALS: 'true'
+      CORS_MAX_AGE: '18000'
+      CORS_PREFLIGHT_CONTINUE: 'true'
       LOG_LEVEL: 'info' # Changed from debug to reduce logs
       
       # Performance optimizations
