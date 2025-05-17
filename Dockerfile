@@ -23,12 +23,67 @@ COPY --from=frontend-deps /app/frontend/node_modules ./node_modules
 RUN bun run build
 
 # ---- Frontend Development Stage ----
-# Inherit from frontend-deps (which uses bun-base and runs bun install)
-FROM frontend-deps AS frontend-dev
-# WORKDIR is already /app/frontend from frontend-deps
+FROM oven/bun:1-alpine AS frontend-dev
+
+# Install build dependencies
+RUN apk add --no-cache \
+    curl \
+    git \
+    python3 \
+    make \
+    g++ \
+    shadow \
+    && rm -rf /var/cache/apk/*
+
+# Create app directory and set permissions
+RUN mkdir -p /app/frontend/node_modules/.vite/deps_temp \
+    && chown -R 1000:1000 /app \
+    && chmod -R 777 /app/frontend/node_modules/.vite
+
+# Set working directory
+WORKDIR /app/frontend
+
+# Set environment variables
 ENV NODE_ENV=development
-EXPOSE 3000
-# Source code will be mounted from the host. node_modules are already installed by frontend-deps.
+ENV PATH="/app/frontend/node_modules/.bin:$PATH"
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Ensure Vite cache directory has correct permissions
+RUN mkdir -p /app/frontend/node_modules/.vite/deps_temp \
+    && chown -R 1000:1000 /app/frontend/node_modules/.vite \
+    && chmod -R 777 /app/frontend/node_modules/.vite
+
+# Copy package files first for better caching
+COPY --chown=1000:1000 frontend/package.json frontend/bun.lockb* ./
+
+# Switch to UID 1000
+USER 1000
+
+# Install dependencies
+RUN bun install --frozen-lockfile --no-save || \
+    (echo "Bun install failed, falling back to npm" && \
+     rm -rf node_modules && \
+     npm install --no-package-lock)
+
+# Copy the rest of the application
+COPY --chown=1000:1000 . .
+
+# Ensure Vite cache directory has correct permissions
+RUN mkdir -p /app/frontend/node_modules/.vite/deps_temp \
+    && chown -R 1000:1000 /app/frontend/node_modules/.vite \
+    && chmod -R 777 /app/frontend/node_modules/.vite
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
+
+# Set default command
 CMD ["bun", "run", "dev"]
 
 # ---- Frontend Runner Stage ----
@@ -40,31 +95,27 @@ RUN addgroup --system --gid 1001 appgroup && \
     adduser --system --uid 1001 appuser && \
     adduser appuser appgroup
 
-# Set environment to production for Next.js
+# Set environment to production
 ENV NODE_ENV=production
 
-# Copy Next.js build artifacts from frontend-builder
-COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/.next ./frontend/.next
+# Install serve for static file serving
+RUN npm install -g serve
+
+# Copy Vite build artifacts from frontend-builder
+COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist ./frontend/dist
 COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/public ./frontend/public
 COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/package.json ./frontend/package.json
 
-# Install production dependencies using npm (as Next.js typically runs with Node)
-# Alternatively, if your start script uses bun, you might copy node_modules from frontend-builder
-# or run bun install --production here. For now, assuming npm for 'next start'.
-USER root
-RUN cd ./frontend && npm install --omit=dev
-
-# Change ownership of the frontend directory to appuser after npm install
+# Change ownership of the frontend directory to appuser
 RUN chown -R appuser:appgroup ./frontend
 
 USER appuser
 WORKDIR /app/frontend
 
-EXPOSE 3000
+EXPOSE 8080
 
-# HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 CMD curl -f http://localhost:3000/api/health || exit 1
-# Add a healthcheck if your Next.js app has a health endpoint e.g. /api/health
+# HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 CMD curl -f http://localhost:8080/ || exit 1
+# Add a healthcheck if needed
 
-# Start Next.js application
-# Ensure your package.json has a "start": "next start" script
-CMD ["npm", "run", "start"]
+# Serve the static Vite build
+CMD ["serve", "-s", "dist", "-l", "8080"]

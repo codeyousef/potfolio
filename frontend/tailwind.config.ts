@@ -1,124 +1,165 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
-const config: Config = {
-  content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
-  safelist: [
-    'font-montserrat',
-    'font-inter',
-    'font-roboto-mono',
-    'text-brand-off-white', 
-    'bg-black', 
-    'bg-primary-accent', 
-    'text-white', 
-    'border-gray-800',
-    'border-white', 
-    'border-primary-accent', 
-    'hover:bg-primary-accent-dark', 
-    'hover:text-white',
-    'hover:text-brand-off-white',
-    'hover:border-primary-accent', 
-    // Emergence phase-related classes
-    'phase-seed',
-    'phase-growth',
-    'phase-bloom',
-  ],
-  theme: {
-    extend: {
-      colors: {
-        // Emergence theme palette
-        'primary-accent': '#0073E6',     // Blue accent
-        'primary-accent-dark': '#0052A3', // Darker blue for hover states
-        'secondary-accent': '#50E3C2',   // Minty Teal accent
-        'tertiary-accent': '#F0C3FF',    // Subtle lavender accent
-        
-        // Base brand colors
-        'brand-bg': '#070707',           // Deep Black background
-        'brand-text': '#A0A0A0',         // Refined Gray for body text
-        'brand-off-white': '#F0F0F0',    // Off-white for contrast
-        'brand-true-black': '#000000',   // True Black (for elements needing pure black)
-        'brand-pure-white': '#FFFFFF',   // Pure White for highlights
-        
-        // Emergence phase-specific colors
-        'seed-bg': '#050505',            // Darker background for Seed/Veil phase
-        'seed-text': '#707070',          // Muted text for Seed/Veil phase
-        'seed-accent': '#293D5C',        // Muted accent for Seed/Veil phase
-        
-        'growth-bg': '#0F0F0F',          // Transitional background for Growth phase
-        'growth-text': '#B0B0B0',        // Brightening text for Growth phase
-        'growth-accent': '#0062C4',      // Brightening accent for Growth phase
-        
-        'bloom-bg': '#121212',           // Final bright background for Bloom phase
-        'bloom-text': '#D0D0D0',         // Bright text for Bloom phase
-        'bloom-accent': '#0073E6',       // Full accent for Bloom phase
-        
-        // Conversion element colors
-        'cta-primary': '#0073E6',        // Primary CTA color
-        'cta-secondary': '#50E3C2',      // Secondary CTA color
-        'cta-highlight': '#FFFFFF',      // CTA highlight color
-        'cta-subtle': 'rgba(80, 227, 194, 0.15)', // Subtle background for secondary CTAs
-      },
-      fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],        // Base body font
-        heading: ['var(--font-montserrat)', 'sans-serif'], // Primary heading font
-        mono: ['var(--font-roboto-mono)', 'monospace'],    // Monospace for code & UI elements
-        display: ['var(--font-montserrat)', 'sans-serif'], // Display heading (can be customized later)
-      },
-      transitionTimingFunction: {
-        'display': 'cubic-bezier(0.83, 0, 0.17, 1)',      // Dramatic, exhibition-style transitions
-        'interactive': 'cubic-bezier(0.4, 0, 0.2, 1)',    // Responsive interactive elements
-        'emergence': 'cubic-bezier(0.16, 1, 0.3, 1)',     // Special curve for emergence animations
-        'bloom': 'cubic-bezier(0.34, 1.56, 0.64, 1)',     // Slightly bouncy for bloom phase
-      },
-      transitionDuration: {
-        'epic': '2000ms',     // Very slow, dramatic transitions
-        'slow': '1500ms',     // Slow transitions
-        'medium': '900ms',    // Medium transitions
-        'fast': '600ms',      // Fast transitions
-        'quick': '300ms',     // Quick microinteractions
-      },
-      spacing: {
-        '128': '32rem',       // Extra large spacing
-        '144': '36rem',       // XXL spacing
-      },
-      borderWidth: {
-        'hairline': '0.5px',  // Ultra-thin border for high fashion elements
-      },
-      boxShadow: {
-        'inner-glow': 'inset 0 0 20px 5px rgba(255, 255, 255, 0.05)',
-        'outer-glow': '0 0 15px 2px rgba(255, 255, 255, 0.1)',
-        'cta': '0 0 25px rgba(0, 115, 230, 0.4)',
-      },
-      keyframes: {
-        pulse: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.5' },
-        },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
-      },
-      animation: {
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'pulse-medium': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'fade-in': 'fadeIn 1.5s ease-out forwards',
-        'shimmer': 'shimmer 2s infinite linear',
-      },
-      backdropBlur: {
-        xs: '2px',
-      },
-    },
-  },
-  plugins: [],
-};
-
-export default config;
+export default {
+	darkMode: ["class"],
+	content: [
+		"./pages/**/*.{ts,tsx}",
+		"./components/**/*.{ts,tsx}",
+		"./app/**/*.{ts,tsx}",
+		"./src/**/*.{ts,tsx}",
+	],
+	prefix: "",
+	theme: {
+		container: {
+			center: true,
+			padding: '2rem',
+			screens: {
+				'2xl': '1400px'
+			}
+		},
+		extend: {
+			fontFamily: {
+				'montserrat': ['Montserrat', 'sans-serif'],
+				'roboto-mono': ['Roboto Mono', 'monospace'],
+				'body': ['Inter', 'sans-serif'],
+				'heading': ['Montserrat', 'sans-serif'],
+			},
+			colors: {
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
+				primary: {
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))'
+				},
+				secondary: {
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))'
+				},
+				destructive: {
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))'
+				},
+				muted: {
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))'
+				},
+				accent: {
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))'
+				},
+				popover: {
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))'
+				},
+				card: {
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))'
+				},
+				// Aethelframe custom colors
+				'highlight-color': '#E2C8A0', // Gold accent for luxury feel
+				'dark-bg': '#0A0A0A', // Near-black for dramatic contrast
+				'light-bg': '#F8F8F8', // Off-white for bloom phase
+				
+				// Keep some of the original project's phase-specific colors for Directus integration
+				'seed-accent': '#293D5C',
+				'growth-accent': '#0062C4',
+				'bloom-accent': '#0073E6',
+			},
+			borderRadius: {
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)'
+			},
+			keyframes: {
+				'accordion-down': {
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' },
+				},
+				'accordion-up': {
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' },
+				},
+				'fade-in': {
+					"0%": {
+						opacity: "0",
+						transform: "translateY(10px)"
+					},
+					"100%": {
+						opacity: "1",
+						transform: "translateY(0)"
+					}
+				},
+				'fade-out': {
+					"0%": {
+						opacity: "1",
+						transform: "translateY(0)"
+					},
+					"100%": {
+						opacity: "0",
+						transform: "translateY(10px)"
+					}
+				},
+				'scale-in': {
+					"0%": {
+						transform: "scale(0.95)",
+						opacity: "0"
+					},
+					"100%": {
+						transform: "scale(1)",
+						opacity: "1"
+					}
+				},
+				'scale-out': {
+					from: { transform: "scale(1)", opacity: "1" },
+					to: { transform: "scale(0.95)", opacity: "0" }
+				},
+				'slide-in-right': {
+					"0%": { transform: "translateX(100%)" },
+					"100%": { transform: "translateX(0)" }
+				},
+				'slide-out-right': {
+					"0%": { transform: "translateX(0)" },
+					"100%": { transform: "translateX(100%)" }
+				},
+				'pulse': {
+					'0%, 100%': { opacity: 1 },
+					'50%': { opacity: 0.7 },
+				},
+				'glow': {
+					'0%, 100%': { 
+						textShadow: '0 0 5px rgba(226, 200, 160, 0.5), 0 0 10px rgba(226, 200, 160, 0.3)' 
+					},
+					'50%': { 
+						textShadow: '0 0 10px rgba(226, 200, 160, 0.8), 0 0 20px rgba(226, 200, 160, 0.5)' 
+					}
+				},
+				'orbit': {
+					'0%': { transform: 'rotate(0deg) translateX(8px) rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg) translateX(8px) rotate(-360deg)' }
+				},
+			},
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-out': 'fade-out 0.3s ease-out',
+				'scale-in': 'scale-in 0.2s ease-out',
+				'scale-out': 'scale-out 0.2s ease-out',
+				'slide-in-right': 'slide-in-right 0.3s ease-out',
+				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'pulse-slow': 'pulse 3s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite',
+				'orbit': 'orbit 3s linear infinite',
+				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out',
+				'exit': 'fade-out 0.3s ease-out, scale-out 0.2s ease-out',
+			},
+			transitionTimingFunction: {
+				'custom-ease': 'cubic-bezier(0.76, 0, 0.24, 1)',
+			}
+		}
+	},
+	plugins: [require("tailwindcss-animate")],
+} satisfies Config;

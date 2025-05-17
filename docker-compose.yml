@@ -13,6 +13,12 @@ services:
     restart: unless-stopped
     networks:
       - portfolio-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-portfolio} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   directus:
     image: directus/directus:latest
@@ -20,10 +26,10 @@ services:
     ports:
       - "8055:8055"
     environment:
-      KEY: ${DIRECTUS_KEY:-your-strong-random-key}
-      SECRET: ${DIRECTUS_SECRET:-your-super-strong-random-secret}
-      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@example.com}
-      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-Password123!}
+      KEY: ${DIRECTUS_KEY:-dgedrrgfhdgsgsg}
+      SECRET: ${DIRECTUS_SECRET:-ehrtyjegdzsargdrtgehgdgdger}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-yousef.baitalmal@gmail.com}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-applejuice}
 
       DB_CLIENT: pg
       DB_HOST: postgres
@@ -31,21 +37,42 @@ services:
       DB_DATABASE: ${POSTGRES_DB:-portfolio}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_POOL_ENABLED: 'true'
+      DB_POOL_MIN: '1'
+      DB_POOL_MAX: '15'
 
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
 
       # Explicit CORS Configuration
       CORS_ENABLED: 'true'
-      CORS_ORIGIN: 'http://localhost:3000'
-      LOG_LEVEL: 'debug' # Enable debug logging
+      CORS_ORIGIN: 'http://localhost:8080'
+      LOG_LEVEL: 'info' # Changed from debug to reduce logs
+      
+      # Performance optimizations
+      CACHE_ENABLED: 'true'
+      CACHE_STORE: 'memory'
+      CACHE_TTL: '600'
+      
+      # Security
+      RATE_LIMITER_ENABLED: 'true'
+      RATE_LIMITER_POINTS: 50
+      RATE_LIMITER_DURATION: 1
+      
     volumes:
       - directus-uploads:/directus/uploads
       - directus-data:/directus/data
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - portfolio-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8055/server/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   frontend:
     build:
@@ -53,22 +80,41 @@ services:
       dockerfile: Dockerfile
       target: frontend-dev
     container_name: portfolio-frontend
+    user: "1000:1000"  # Use UID 1000 directly
     environment:
-      NEXT_PUBLIC_API_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
       NODE_ENV: development
-      # For Windows/macOS, if HMR is still flaky, uncomment the next line:
+      VITE_API_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
+      DIRECTUS_STATIC_TOKEN: ${DIRECTUS_STATIC_TOKEN:-}
+      VITE_HMR_HOST: "0.0.0.0"
+      HOST: "0.0.0.0"
+      CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
+      NODE_OPTIONS: --max-old-space-size=4096
+      NEXT_TELEMETRY_DISABLED: 1
     ports:
-      - "3000:3000"
+      - "8080:8080"
     volumes:
-      - ./frontend:/app/frontend
-      - /app/frontend/node_modules
-      # - /app/frontend/.next
+      - ./frontend:/app/frontend:delegated
+      - frontend-node-modules:/app/frontend/node_modules
+      - frontend-next:/app/frontend/.next
+      - frontend-vite:/app/frontend/node_modules/.vite
+    working_dir: /app/frontend
+    stdin_open: true
+    tty: true
     depends_on:
-      - directus
+      postgres:
+        condition: service_healthy
+      directus:
+        condition: service_started
     restart: unless-stopped
     networks:
       - portfolio-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
 networks:
   portfolio-network:
@@ -78,3 +124,6 @@ volumes:
   postgres-data:
   directus-uploads:
   directus-data:
+  frontend-node-modules:
+  frontend-next:
+  frontend-vite:
