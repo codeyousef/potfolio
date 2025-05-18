@@ -40,6 +40,21 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:8055); d
 done
 echo "Directus is ready!"
 
+# Setup Directus permissions
+echo "Setting up Directus permissions..."
+docker-compose exec -T directus npx directus schema apply --yes ./snapshot.yaml || echo "Warning: Could not apply schema snapshot"
+
+# Install dependencies for the setup script
+echo "Installing dependencies for permission setup..."
+docker-compose exec -T directus npm install @directus/sdk
+
+# Run the permission setup script
+echo "Running permission setup..."
+docker cp setup-directus-permissions.js directus:/directus/setup-directus-permissions.js
+docker-compose exec -T directus node setup-directus-permissions.js
+
+echo "Directus setup complete!"
+
 # Check if frontend is running
 if check_container "portfolio-frontend"; then
   echo "Frontend is running at http://localhost:8080"

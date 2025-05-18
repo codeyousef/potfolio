@@ -287,5 +287,31 @@ declare module '@directus/sdk' {
   }
 }
 
-export { directus };
+// Add a function to check if we're authenticated
+async function ensureAuthenticated() {
+  try {
+    // If we already have a token, we're good
+    if (directus.auth.token) {
+      return true;
+    }
+
+    // Try to authenticate with static token if available
+    if (process.env.DIRECTUS_STATIC_TOKEN) {
+      await directus.auth.static(process.env.DIRECTUS_STATIC_TOKEN);
+      console.log('Authenticated with static token');
+      return true;
+    }
+
+    // If no static token is available, try to get the current user
+    // This will trigger the authentication flow if needed
+    await directus.getCurrentUser();
+    return true;
+  } catch (error) {
+    console.error('Authentication failed:', error);
+    return false;
+  }
+}
+
+// Always use ESM exports
+export { directus, ensureAuthenticated };
 export default directus;
