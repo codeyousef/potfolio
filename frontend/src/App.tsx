@@ -6,6 +6,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/lib/directus/auth-context";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ProjectDetail from "./pages/ProjectDetail";
+import ServiceDetail from "./pages/ServiceDetail";
 
 // Admin Components
 import AdminLayout from "./pages/admin/layout";
@@ -13,6 +15,7 @@ import AdminDashboard from "./pages/admin/page";
 import AdminProjects from "./pages/admin/projects/page";
 import AdminProjectEdit from "./pages/admin/projects/[id]/page";
 import AdminProjectNew from "./pages/admin/projects/new/page";
+import AdminSettings from "./pages/admin/settings/page";
 import LoginPage from "./pages/admin/login/page";
 
 const queryClient = new QueryClient();
@@ -44,6 +47,12 @@ const App = () => (
       <Routes>
         <Route path="/" element={<Index />} />
         
+        {/* Project Detail Page */}
+        <Route path="/projects/:slug" element={<ProjectDetail />} />
+        
+        {/* Service Detail Page */}
+        <Route path="/services/:slug" element={<ServiceDetail />} />
+        
         {/* Admin Routes */}
         <Route path="/admin" element={
           <ProtectedRoute>
@@ -73,6 +82,14 @@ const App = () => (
           <ProtectedRoute>
             <AdminLayout>
               <AdminProjectEdit />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/settings" element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminSettings />
             </AdminLayout>
           </ProtectedRoute>
         } />

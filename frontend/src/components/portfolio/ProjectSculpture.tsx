@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useAethelframeStore } from '../../store/useAethelframeStore';
 import { DirectusProject } from '../../types/directus';
+import { Link } from 'react-router-dom';
 
 interface ProjectSculptureProps {
   project: DirectusProject;
@@ -91,12 +92,12 @@ const ProjectSculpture = ({
         }}
       >
         <p className="text-gray-400 text-sm mb-3">{project.description || 'No description available.'}</p>
-        <button 
-          onClick={() => console.log(`Navigate to project: ${project.slug}`)}
-          className="canvas-action-link text-sm"
+        <Link 
+          to={`/projects/${project.slug}`}
+          className="canvas-action-link text-sm inline-flex items-center"
         >
-          Discover →
-        </button>
+          Discover <span className="ml-1">→</span>
+        </Link>
       </motion.div>
     </motion.div>
   );

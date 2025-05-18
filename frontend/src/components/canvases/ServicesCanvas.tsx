@@ -1,10 +1,21 @@
+import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import KineticCanvasWrapper from '../core/KineticCanvasWrapper';
 import ParticleAccent from '../effects/ParticleAccent';
 import { useAethelframeStore } from '../../store/useAethelframeStore';
 import { DirectusService } from '../../types/directus';
 
-const ServiceCard = ({ service }: { service: DirectusService }) => {
+// Extend the DirectusService type to include the slug property
+interface ServiceWithSlug extends DirectusService {
+  slug: string;
+}
+
+interface ServiceCardProps {
+  service: ServiceWithSlug;
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   const directusUrl = import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL;
   const imageUrl = service.featured_image && typeof service.featured_image === 'object' && service.featured_image.id 
     ? `${directusUrl}/assets/${service.featured_image.id}?key=service-thumb` 
@@ -25,7 +36,11 @@ const ServiceCard = ({ service }: { service: DirectusService }) => {
       )}
 
       <div className="service-content p-6">
-        <h3 className="text-xl font-heading text-highlight-color mb-3">{service.title}</h3>
+        <h3 className="text-xl font-heading text-highlight-color mb-3">
+          <Link to={`/services/${service.slug}`} className="hover:underline">
+            {service.title}
+          </Link>
+        </h3>
 
         {service.description_rich_text ? (
           <div 
@@ -67,9 +82,11 @@ const ServicesCanvas = () => {
           </div>
         ) : (
           <div className="services-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service) => (
-              <ServiceCard key={service.id} service={service} />
-            ))}
+            {services.map((service) => {
+              // Ensure the service has a slug before rendering the card
+              if (!('slug' in service) || !service.slug) return null;
+              return <ServiceCard key={service.id} service={service as ServiceWithSlug} />;
+            })}
           </div>
         )}
       </div>

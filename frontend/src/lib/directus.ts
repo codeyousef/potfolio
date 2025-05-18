@@ -40,11 +40,30 @@ export async function getPublishedProjects(): Promise<DirectusProject[]> {
         filter: {
           status: { _eq: 'published' },
         },
-        fields: ['*', 'main_image.*'], // Fetch all fields from Projects and all fields from related main_image
-        // Add other query parameters like sort if needed, e.g., sort: ['-date_created']
+        fields: [
+          'id',
+          'title',
+          'slug',
+          'description',
+          'status',
+          'date_created',
+          'date_updated',
+          'main_image',
+          'main_image.id',
+          'main_image.filename_disk',
+          'main_image.title',
+          'main_image.description',
+          'main_image.width',
+          'main_image.height',
+          'technologies',
+          'technologies.id',
+          'technologies.name'
+        ],
+        sort: ['-date_created']
       })
     );
-    return projects as DirectusProject[]; // Cast to DirectusProject[]
+    console.log('Fetched projects:', projects); // Debug log
+    return projects as DirectusProject[];
   } catch (error) {
     console.error('Error fetching published projects:', error);
     return [];

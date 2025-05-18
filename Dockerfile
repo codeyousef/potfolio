@@ -10,8 +10,9 @@ WORKDIR /app
 # ---- Frontend Dependencies ----
 FROM bun-base AS frontend-deps
 WORKDIR /app/frontend
-COPY frontend/package.json ./ 
-# Ensure bun.lockb is copied if that's the lockfile name, or bun.lock* for flexibility
+COPY frontend/package.json frontend/bun.lock* ./
+# Install dependencies and development type definitions
+RUN bun add -D @types/react @types/react-dom @types/node @types/react-router-dom @types/framer-motion @types/lucide-react
 RUN bun install # Use --frozen-lockfile for reproducible builds
 
 # ---- Frontend Builder ----
