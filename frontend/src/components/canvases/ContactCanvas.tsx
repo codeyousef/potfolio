@@ -44,9 +44,9 @@ const ContactCanvas = () => {
     <KineticCanvasWrapper id="contact">
       <ParticleAccent count={10} />
 
-      <div className="canvas-content-wrapper items-center justify-center text-center p-6">
+      <div className="canvas-content-wrapper items-center justify-center text-center p-6 w-full max-w-4xl mx-auto">
         <motion.h2 
-          className="page-title"
+          className="page-title mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
@@ -54,39 +54,36 @@ const ContactCanvas = () => {
           Contact
         </motion.h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="w-full flex flex-col items-center">
           {/* Contact Information */}
           <motion.div 
-            className="contact-info"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            className="w-full max-w-2xl text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <h3 className="text-2xl font-heading text-highlight-color mb-6">Get in Touch</h3>
-
-            <div className="mb-8">
-              <p className="text-gray-300 mb-4">
-                We'd love to hear from you. Whether you have a question about our services, 
-                projects, or anything else, our team is ready to answer all your questions.
-              </p>
-
-              <ul className="space-y-4 text-gray-400">
-                <li className="flex items-start">
-                  <span className="font-mono text-highlight-color mr-2">Email:</span>
-                  <a href="mailto:hello@aethelframe.com" className="hover:text-highlight-color transition-colors">
-                    hello@aethelframe.com
-                  </a>
-                </li>
-                <li className="flex items-start">
-                  <span className="font-mono text-highlight-color mr-2">Location:</span>
-                  <span>Digital Realm, Creative District</span>
-                </li>
-              </ul>
+            <p className="text-gray-300 mb-8">
+              We'd love to hear from you. Whether you have a question about our services, 
+              projects, or anything else, our team is ready to answer all your questions.
+            </p>
+            
+            <div className="flex justify-center space-x-12 mb-8">
+              <div className="flex items-center">
+                <span className="font-mono text-highlight-color mr-2">Email:</span>
+                <a href="mailto:hello@aethelframe.com" className="hover:text-highlight-color transition-colors">
+                  hello@aethelframe.com
+                </a>
+              </div>
+              <div className="flex items-center">
+                <span className="font-mono text-highlight-color mr-2">Location:</span>
+                <span>Digital Realm, Creative District</span>
+              </div>
             </div>
 
             <div className="social-links">
               <h4 className="text-sm font-mono text-gray-500 mb-3">CONNECT WITH US</h4>
-              <div className="flex space-x-4">
+              <div className="flex justify-center space-x-6">
                 <a href="#" className="social-link">Twitter</a>
                 <a href="#" className="social-link">Instagram</a>
                 <a href="#" className="social-link">LinkedIn</a>
@@ -96,12 +93,12 @@ const ContactCanvas = () => {
 
           {/* Contact Form */}
           <motion.div 
-            className="contact-form"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+            className="w-full max-w-2xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 w-full">
               <div>
                 <label htmlFor="name" className="block text-sm font-mono text-gray-400 mb-2">
                   Name

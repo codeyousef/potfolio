@@ -1,8 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import { useAethelframeStore } from '../../store/useAethelframeStore';
-import CuratorLensNav from '../navigation/CuratorLensNav';
-import PositionIndicator from '../navigation/PositionIndicator';
-import ContactBeacon from '../navigation/ContactBeacon';
+import PageTitlesNav from '../navigation/PageTitlesNav';
 import HomeCanvas from '../canvases/HomeCanvas';
 import PortfolioCanvas from '../canvases/PortfolioCanvas';
 import ServicesCanvas from '../canvases/ServicesCanvas';
@@ -16,10 +14,8 @@ const SiteShell = () => {
     <div className="fixed inset-0 overflow-hidden">
       <div className="noise-overlay"></div>
       
-      {/* Navigation Components */}
-      <CuratorLensNav />
-      <PositionIndicator />
-      <ContactBeacon />
+      {/* Navigation */}
+      <PageTitlesNav />
       
       {/* Active Canvas */}
       <AnimatePresence mode="wait">

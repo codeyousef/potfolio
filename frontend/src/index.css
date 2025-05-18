@@ -77,6 +77,12 @@
 
   .canvas-content-wrapper {
     @apply h-full w-full flex flex-col items-center justify-center px-4 md:px-8 lg:px-16 overflow-hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
   }
 
   /* Curator's Lens Navigation styles */
@@ -138,8 +144,38 @@
     @apply absolute bg-secondary/90 overflow-hidden rounded-md;
   }
 
+  /* Position Indicator styles */
+  .position-indicator {
+    @apply fixed left-8 top-1/2 -translate-y-1/2 z-50;
+  }
+
+  .indicator-track {
+    @apply relative flex flex-col items-center h-48 justify-between;
+  }
+
+  .indicator-point {
+    @apply relative flex items-center justify-center w-4 h-4 rounded-full bg-highlight-color/20 cursor-pointer transition-all;
+  }
+
+  .indicator-point.active {
+    @apply bg-highlight-color;
+  }
+
+  .indicator-dot {
+    @apply w-2 h-2 rounded-full bg-highlight-color;
+  }
+
+  .indicator-label {
+    @apply absolute left-8 whitespace-nowrap text-sm text-highlight-color;
+  }
+
+  .active-indicator-line {
+    @apply absolute left-1.5 top-0 w-0.5 bg-highlight-color/30 -z-10;
+  }
+
   /* Page title styles */
   .page-title {
-    @apply text-5xl md:text-7xl font-montserrat font-light tracking-wider text-highlight-color mb-4 text-center w-full;
+    @apply text-5xl md:text-7xl font-montserrat font-light tracking-wider text-highlight-color mb-4 text-center w-full mx-auto;
+    max-width: 90%;
   }
 }

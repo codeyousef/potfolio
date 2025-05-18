@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
     }
   }
   
-  // For non-admin routes, continue as normal
+  // For all other routes, continue as normal without authentication check
   return NextResponse.next();
 }
 
