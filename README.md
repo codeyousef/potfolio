@@ -1,6 +1,6 @@
 # Aethelframe Protocol Portfolio
 
-This project implements the Aethelframe Protocol portfolio website with the "Emergence" theme as detailed in the design specification. The project uses a modern tech stack with Next.js for the frontend and Strapi CMS for the backend, with PostgreSQL as the database.
+This project implements the Aethelframe Protocol portfolio website with the "Emergence" theme as detailed in the design specification. The project uses a modern tech stack with Next.js for the frontend and Django for the backend, with PostgreSQL as the database.
 
 ## Project Structure
 
@@ -12,21 +12,23 @@ Portfolio/
 │   ├── lib/               # Utility functions and API clients
 │   └── ...                # Other Next.js config files
 │
-├── backend/               # Strapi CMS backend
-│   ├── config/            # Strapi configuration
-│   ├── src/               # Strapi source code
-│   └── ...                # Other Strapi files
+├── backend/               # Django backend application
+│   ├── config/            # Django configuration
+│   ├── api/               # Django API views and serializers
+│   ├── models/            # Django data models
+│   └── ...                # Other Django files
 │
 ├── docs/                  # Documentation including design specs
 ├── Dockerfile             # Combined Docker configuration
 ├── docker-compose.yml     # Docker Compose for local development
-└── start-services.sh      # Script to start services in Docker
+├── run-all-tests.sh       # Script to run all tests
+└── init-multiple-dbs.sh   # Script to initialize multiple databases
 ```
 
 ## Technology Stack
 
 - **Frontend**: Next.js with TypeScript, TailwindCSS
-- **CMS**: Strapi (headless CMS)
+- **Backend**: Django (Python web framework)
 - **Database**: PostgreSQL
 - **Containerization**: Docker
 
@@ -37,6 +39,15 @@ Portfolio/
 - Node.js (v18 or higher)
 - Docker and Docker Compose
 - Git
+
+### Docker Compose Setup
+
+The project uses Docker Compose to manage services:
+
+- **Main Services**: The postgres, backend, and frontend services start by default with `docker-compose up`
+- **Test Service**: The tests service is only started when explicitly requested with `docker-compose --profile test up tests`
+
+This setup allows you to easily start the development environment or run tests as needed.
 
 ### Local Development
 
@@ -51,7 +62,7 @@ Portfolio/
    # Install frontend dependencies
    cd frontend
    npm install
-   
+
    # Install backend dependencies
    cd ../backend
    npm install
@@ -65,15 +76,25 @@ Portfolio/
 
    **Using Docker Compose (recommended)**:
    ```
+   # Start development environment
    docker-compose up
+
+   # To build containers and run in detached mode
+   docker-compose up --build -d
+   ```
+
+   **Running tests**:
+   ```
+   # Run all tests
+   docker-compose --profile test up tests
    ```
 
    **Or start services individually**:
    ```
-   # Start Strapi backend
+   # Start Django backend
    cd backend
-   npm run develop
-   
+   python manage.py runserver
+
    # Start Next.js frontend in another terminal
    cd frontend
    npm run dev
@@ -81,25 +102,51 @@ Portfolio/
 
 5. Access the applications:
    - Frontend: http://localhost:3000
-   - Strapi Admin: http://localhost:1337/admin
+   - Django Admin: http://localhost:8000/admin
+
+## Testing
+
+The project uses a consolidated testing approach with Docker Compose profiles:
+
+### Running All Tests
+
+To run all tests (backend and frontend):
+
+```bash
+docker-compose --profile test up tests
+```
+
+This command:
+1. Starts the postgres service with both development and test databases
+2. Runs the backend tests using Django's test framework
+3. Runs the frontend tests using the configured test runner
+
+### Test Database
+
+The project uses a separate test database (`test_portfolio`) that is automatically created when the postgres service starts. This ensures that your development database remains untouched during testing.
 
 ## Building for Production
 
 To build and run the application for production:
 
 ```
-docker build -t portfolio .
-docker run -p 3000:3000 -p 1337:1337 portfolio
+# Build the production images
+docker build -t portfolio-backend ./backend --target production
+docker build -t portfolio-frontend . --target production
+
+# Run the containers
+docker run -d -p 8000:8000 portfolio-backend
+docker run -d -p 3000:3000 portfolio-frontend
 ```
 
 ## Content Management
 
-After setting up Strapi:
+The project uses Django Admin for content management:
 
-1. Create an admin user when you first access the Strapi admin panel
-2. Create content types based on the design requirements
-3. Add content for projects, blog posts, services, etc.
-4. The frontend will automatically fetch and display this content
+1. Access the Django admin panel at http://localhost:8000/admin
+2. Log in with the admin credentials (default: admin/admin)
+3. Manage content through the admin interface
+4. The frontend will automatically fetch and display this content via the API
 
 ## Design Implementation
 
