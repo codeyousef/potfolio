@@ -18,7 +18,7 @@ COPY frontend/package.json frontend/package-lock.json* ./frontend/
 
 # Install dependencies
 WORKDIR /app/frontend
-RUN npm ci
+RUN npm install
 
 # ---- Builder Stage ----
 FROM base AS builder
@@ -38,7 +38,7 @@ WORKDIR /app/frontend
 
 # Copy package files and install dev dependencies
 COPY --from=deps /app/frontend/package.json /app/frontend/package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 # Copy application code
 COPY . .
@@ -74,7 +74,7 @@ COPY --from=builder /app/frontend/package.json ./
 COPY --from=builder /app/frontend/next.config.js ./
 
 # Install production dependencies
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # Set environment variables
 ENV NODE_ENV=production

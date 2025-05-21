@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import directus from '@/lib/directus';
+import { getServiceBySlug } from '@/lib/api';
 import { DirectusService } from '@/types/directus';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -10,19 +10,30 @@ import { Link } from 'react-router-dom';
 const ServiceDetail = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: service, isLoading, error } = useQuery<DirectusService>({
+  const { data: service, isLoading, error } = useQuery<DirectusService | null>({
     queryKey: ['service', slug],
     queryFn: async () => {
-      const { data } = await directus.items('services').readByQuery({
-        filter: { slug: { _eq: slug } },
-        fields: [
-          '*',
-          'featured_image.*',
-          'related_services.*',
-        ],
-        limit: 1,
-      });
-      return data?.[0];
+      if (!slug) {
+        console.error('No slug provided in URL');
+        return null;
+      }
+
+      console.log('Fetching service with slug:', slug);
+
+      try {
+        const service = await getServiceBySlug(slug);
+        console.log('Fetched service:', service);
+
+        if (!service) {
+          console.error('Service not found for slug:', slug);
+          return null;
+        }
+
+        return service;
+      } catch (err) {
+        console.error('Error fetching service:', err);
+        return null;
+      }
     },
   });
 
@@ -80,7 +91,7 @@ const ServiceDetail = () => {
                   <p className="text-xl text-primary mb-6">{service.tagline}</p>
                 )}
               </div>
-              
+
               {service.icon && (
                 <div className="p-4 bg-secondary rounded-lg">
                   <span className="text-4xl">{service.icon}</span>

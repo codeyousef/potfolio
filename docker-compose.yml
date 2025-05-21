@@ -20,68 +20,92 @@ services:
       retries: 10
       start_period: 10s
 
-  directus:
-    image: directus/directus:latest
-    container_name: portfolio-directus
-    ports:
-      - "8055:8055"
+  postgres-test:
+    image: postgres:14
+    container_name: portfolio-postgres-test
     environment:
-      KEY: ${DIRECTUS_KEY:-dgedrrgfhdgsgsg}
-      SECRET: ${DIRECTUS_SECRET:-ehrtyjegdzsargdrtgehgdgdger}
-      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-yousef.baitalmal@gmail.com}
-      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-applejuice}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: test_portfolio
+    ports:
+      - "5433:5432"
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d test_portfolio || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
-      DB_CLIENT: pg
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${POSTGRES_DB:-portfolio}
-      DB_USER: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      DB_POOL_ENABLED: 'true'
-      DB_POOL_MIN: '1'
-      DB_POOL_MAX: '15'
-
-      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
-      SERVER_HOST: '0.0.0.0'
-      SERVER_PORT: '8055'
-
-      # CORS Configuration
-      CORS_ENABLED: 'true'
-      CORS_ORIGIN: '*'
-      CORS_METHODS: 'GET,POST,PATCH,DELETE,OPTIONS,PUT,HEAD'
-      CORS_ALLOWED_HEADERS: 'Content-Type,Authorization,X-Requested-With,Origin,Accept,Content-Range,Content-Disposition,Content-Length,Range,Access-Control-Allow-Origin,Access-Control-Allow-Credentials'
-      CORS_EXPOSED_HEADERS: 'Content-Range,X-Total-Count,Content-Length,Content-Type,Content-Disposition,Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Credentials'
-      CORS_CREDENTIALS: 'true'
-      
-      # Performance
-      CACHE_ENABLED: 'true'
-      CACHE_STORE: 'memory'
-      CACHE_TTL: '600'
-      
-      # Security
-      RATE_LIMITER_ENABLED: 'true'
-      RATE_LIMITER_POINTS: 100
-      RATE_LIMITER_DURATION: 1
-      
-      # Logging
-      LOG_LEVEL: 'info'
-      LOG_STYLE: 'raw'
-      
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: portfolio-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_DEBUG=True
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-default-key-for-dev}
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://frontend:3000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-portfolio}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     volumes:
-      - directus-uploads:/directus/uploads
-      - directus-data:/directus/data
+      - ./backend:/app
+      - backend-media:/app/media
+      - backend-static:/app/staticfiles
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8055/server/ping || exit 0"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/api/" ]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 30s
     networks:
       - portfolio-network
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py create_admin_user &&
+             python manage.py create_placeholder_data &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: portfolio-backend-test
+    ports:
+      - "8001:8001"
+    environment:
+      - DJANGO_DEBUG=True
+      - DJANGO_SECRET_KEY=django-insecure-test-key
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend-test
+      - CORS_ALLOWED_ORIGINS=http://localhost:3001,http://frontend-test:3001
+      - POSTGRES_HOST=postgres-test
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=test_portfolio
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - portfolio-network
+    command: >
+      sh -c "python manage.py test"
 
   frontend:
     build:
@@ -97,8 +121,8 @@ services:
       - WATCHPACK_POLLING=true
       - NODE_OPTIONS=--max-old-space-size=4096
       - NEXT_TELEMETRY_DISABLED=1
-      - NEXT_PUBLIC_API_URL=http://directus:8055
-      - DIRECTUS_STATIC_TOKEN=${DIRECTUS_STATIC_TOKEN:-}
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+      - VITE_API_URL=http://localhost:8000/api
     ports:
       - "3000:3000"
     volumes:
@@ -111,7 +135,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      directus:
+      backend:
         condition: service_started
     restart: unless-stopped
     healthcheck:
@@ -121,14 +145,34 @@ services:
       retries: 5
       start_period: 30s
 
+  frontend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: portfolio-frontend-test
+    environment:
+      - NODE_ENV=test
+      - PORT=3001
+      - HOST=0.0.0.0
+      - NEXT_TELEMETRY_DISABLED=1
+      - VITE_API_URL=http://localhost:8001/api
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    working_dir: /app/frontend
+    command: npm test
+    depends_on:
+      - backend-test
+
 networks:
   portfolio-network:
     driver: bridge
 
 volumes:
   postgres-data:
-  directus-uploads:
-  directus-data:
+  backend-media:
+  backend-static:
   frontend-node-modules:
   frontend-next:
   frontend-vite:

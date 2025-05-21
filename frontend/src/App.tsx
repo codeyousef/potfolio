@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProjectDetail from "./pages/ProjectDetail";
 import ServiceDetail from "./pages/ServiceDetail";
+import JournalEntryDetail from "./pages/JournalEntryDetail";
 
 // Admin Components
 import AdminLayout from "./pages/admin/layout";
@@ -46,13 +47,16 @@ const App = () => (
       <Sonner />
       <Routes>
         <Route path="/" element={<Index />} />
-        
+
         {/* Project Detail Page */}
         <Route path="/projects/:slug" element={<ProjectDetail />} />
-        
+
         {/* Service Detail Page */}
         <Route path="/services/:slug" element={<ServiceDetail />} />
-        
+
+        {/* Journal Entry Detail Page */}
+        <Route path="/journal/:slug" element={<JournalEntryDetail />} />
+
         {/* Admin Routes */}
         <Route path="/admin" element={
           <ProtectedRoute>
@@ -61,7 +65,7 @@ const App = () => (
             </AdminLayout>
           </ProtectedRoute>
         } />
-        
+
         <Route path="/admin/projects" element={
           <ProtectedRoute>
             <AdminLayout>
@@ -69,7 +73,7 @@ const App = () => (
             </AdminLayout>
           </ProtectedRoute>
         } />
-        
+
         <Route path="/admin/projects/new" element={
           <ProtectedRoute>
             <AdminLayout>
@@ -77,7 +81,7 @@ const App = () => (
             </AdminLayout>
           </ProtectedRoute>
         } />
-        
+
         <Route path="/admin/projects/:id" element={
           <ProtectedRoute>
             <AdminLayout>
@@ -85,7 +89,7 @@ const App = () => (
             </AdminLayout>
           </ProtectedRoute>
         } />
-        
+
         <Route path="/admin/settings" element={
           <ProtectedRoute>
             <AdminLayout>
@@ -93,9 +97,9 @@ const App = () => (
             </AdminLayout>
           </ProtectedRoute>
         } />
-        
+
         <Route path="/admin/login" element={<LoginPage />} />
-        
+
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

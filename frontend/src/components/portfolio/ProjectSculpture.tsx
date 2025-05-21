@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useAethelframeStore } from '../../store/useAethelframeStore';
 import { DirectusProject } from '../../types/directus';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface ProjectSculptureProps {
   project: DirectusProject;
@@ -19,6 +19,11 @@ const ProjectSculpture = ({
   initialRotate = 0
 }: ProjectSculptureProps) => {
   const { currentPhase } = useAethelframeStore();
+  const navigate = useNavigate();
+
+  const handleProjectClick = () => {
+    navigate(`/projects/${project.slug}`);
+  };
 
   // Construct image URL from Directus asset ID
   const directusUrl = import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL;
@@ -38,7 +43,7 @@ const ProjectSculpture = ({
 
   return (
     <motion.div
-      className="project-sculpture"
+      className="project-sculpture cursor-pointer"
       initial={{
         x: initialX,
         y: initialY,
@@ -63,6 +68,7 @@ const ProjectSculpture = ({
         width: 300,
         height: 400,
       }}
+      onClick={handleProjectClick}
     >
       {/* Project Image */}
       <motion.div 

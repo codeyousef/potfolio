@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getProjectBySlug } from '@/lib/directus';
+import { getProjectBySlug } from '@/lib/api';
 import type { DirectusProject } from '@/types/directus';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -18,18 +18,18 @@ const ProjectDetail = () => {
         console.error('No slug provided in URL');
         return null;
       }
-      
+
       console.log('Fetching project with slug:', slug);
-      
+
       try {
         const project = await getProjectBySlug(slug);
         console.log('Fetched project:', project);
-        
+
         if (!project) {
           console.error('Project not found for slug:', slug);
           return null;
         }
-        
+
         return project;
       } catch (err) {
         console.error('Error fetching project:', err);

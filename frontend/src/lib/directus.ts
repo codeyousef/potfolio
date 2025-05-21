@@ -66,6 +66,13 @@ export async function getPublishedProjects(): Promise<DirectusProject[]> {
     return projects as DirectusProject[];
   } catch (error) {
     console.error('Error fetching published projects:', error);
+
+    // Log more detailed error information if available
+    if (error && typeof error === 'object' && 'errors' in error) {
+      console.error('Detailed error information:', error.errors);
+    }
+
+    // Still return an empty array to prevent UI from breaking
     return [];
   }
 }
@@ -95,6 +102,12 @@ export async function getProjectBySlug(slug: string): Promise<DirectusProject | 
     return null;
   } catch (error) {
     console.error(`Error fetching project by slug ${slug}:`, error);
+
+    // Log more detailed error information if available
+    if (error && typeof error === 'object' && 'errors' in error) {
+      console.error('Detailed error information:', error.errors);
+    }
+
     return null;
   }
 }
@@ -117,6 +130,13 @@ export async function getPublishedJournalEntries(): Promise<DirectusJournalEntry
     return entries as DirectusJournalEntry[];
   } catch (error) {
     console.error('Error fetching published journal entries:', error);
+
+    // Log more detailed error information if available
+    if (error && typeof error === 'object' && 'errors' in error) {
+      console.error('Detailed error information:', error.errors);
+    }
+
+    // Still return an empty array to prevent UI from breaking
     return [];
   }
 }
@@ -141,6 +161,12 @@ export async function getJournalEntryBySlug(slug: string): Promise<DirectusJourn
     return items && items.length > 0 ? (items[0] as DirectusJournalEntry) : null;
   } catch (error) {
     console.error(`Error fetching journal entry by slug ${slug}:`, error);
+
+    // Log more detailed error information if available
+    if (error && typeof error === 'object' && 'errors' in error) {
+      console.error('Detailed error information:', error.errors);
+    }
+
     return null;
   }
 }
@@ -163,6 +189,13 @@ export async function getPublishedServices(): Promise<DirectusService[]> {
     return services as DirectusService[];
   } catch (error) {
     console.error('Error fetching published services:', error);
+
+    // Log more detailed error information if available
+    if (error && typeof error === 'object' && 'errors' in error) {
+      console.error('Detailed error information:', error.errors);
+    }
+
+    // Still return an empty array to prevent UI from breaking
     return [];
   }
 }

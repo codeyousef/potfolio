@@ -44,8 +44,17 @@ export interface DirectusService {
   id: string;
   status: string; // e.g., 'published'
   title: string;
+  slug: string; // For dynamic routing
   description_rich_text?: string; // Main content, likely HTML from WYSIWYG
   icon_svg?: string; // Field to store SVG content directly or an ID to an icon file
   featured_image?: DirectusFile | string; // Optional image for the service
   // any other fields from your Services collection
+}
+
+// Interface for paginated responses from the API
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }

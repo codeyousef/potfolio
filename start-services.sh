@@ -32,28 +32,27 @@ until docker-compose exec -T postgres pg_isready -U postgres; do
 done
 echo "PostgreSQL is ready!"
 
-# Wait for Directus to be ready
-echo "Waiting for Directus to be ready..."
-until $(curl --output /dev/null --silent --head --fail http://localhost:8055); do
-  echo "Directus is not ready yet... waiting"
+# Wait for Django backend to be ready
+echo "Waiting for Django backend to be ready..."
+until $(curl --output /dev/null --silent --head --fail http://localhost:8000/api/); do
+  echo "Django backend is not ready yet... waiting"
   sleep 5
 done
-echo "Directus is ready!"
+echo "Django backend is ready!"
 
-# Setup Directus permissions
-echo "Setting up Directus permissions..."
-docker-compose exec -T directus npx directus schema apply --yes ./snapshot.yaml || echo "Warning: Could not apply schema snapshot"
+# Run Django migrations
+echo "Running Django migrations..."
+docker-compose exec -T backend python manage.py migrate
 
-# Install dependencies for the setup script
-echo "Installing dependencies for permission setup..."
-docker-compose exec -T directus npm install @directus/sdk
+# Create a superuser if it doesn't exist
+echo "Creating Django superuser..."
+docker-compose exec -T backend python manage.py create_admin_user
 
-# Run the permission setup script
-echo "Running permission setup..."
-docker cp setup-directus-permissions.js directus:/directus/setup-directus-permissions.js
-docker-compose exec -T directus node setup-directus-permissions.js
+# Collect static files
+echo "Collecting static files..."
+docker-compose exec -T backend python manage.py collectstatic --noinput
 
-echo "Directus setup complete!"
+echo "Django backend setup complete!"
 
 # Check if frontend is running
 if check_container "portfolio-frontend"; then
@@ -64,8 +63,9 @@ else
 fi
 
 echo "All services are up and running!"
-echo "- Directus admin: http://localhost:8055/admin"
-echo "- Frontend: http://localhost:8080"
+echo "- Django admin: http://localhost:8000/admin"
+echo "- Django API: http://localhost:8000/api"
+echo "- Frontend: http://localhost:3000"
 
 # Show logs for all services
 echo "Showing logs for all services. Press Ctrl+C to exit."

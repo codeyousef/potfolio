@@ -28,22 +28,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check if user is already logged in
     const checkAuth = async () => {
       try {
-        // Skip if we're already on the login page
-        if (window.location.pathname === '/admin/login') {
+        // Skip if we're already on the login page or not on an admin page
+        if (window.location.pathname === '/admin/login' || !window.location.pathname.startsWith('/admin')) {
           setLoading(false);
           return;
         }
 
         console.log('Checking authentication status...');
-        
+
         // Check if user is already logged in on initial load
         const token = localStorage.getItem('directus_token');
-        
+
         if (token) {
           // Set the token in the Directus client
           // @ts-ignore - Directus types don't include the setToken method
           await directus.setToken(token);
-          
+
           // Fetch the current user
           const user = await directus.getCurrentUser();
           if (user) {
@@ -53,16 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem('directus_token');
           }
         }
-        
+
         // Use the Directus client to check authentication
         const currentUser = await directus.getCurrentUser();
-        
+
         if (!currentUser) {
           throw new Error('Not authenticated');
         }
-        
+
         console.log('User is authenticated:', currentUser);
-        
+
         setUser({
           id: currentUser.id,
           email: currentUser.email,
@@ -73,9 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.log('Not authenticated, redirecting to login...');
         setUser(null);
-        
-        // Only redirect if we're not already on the login page
-        if (window.location.pathname !== '/admin/login') {
+
+        // Only redirect if we're trying to access an admin page and not already on the login page
+        if (window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
           console.log('Redirecting to login from:', window.location.pathname);
           navigate('/admin/login', { 
             state: { from: window.location.pathname },
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       console.log('Attempting login for:', email);
-      
+
       // Make a direct login request to the Directus API with JSON response
       const loginResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8055'}/auth/login`, {
         method: 'POST',
@@ -115,15 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const loginData = await loginResponse.json();
       console.log('Login successful:', loginData);
-      
+
       if (!loginData.data?.access_token) {
         throw new Error('No access token received from login');
       }
-      
+
       // Store the access token in local storage
       const token = loginData.data.access_token;
       localStorage.setItem('directus_token', token);
-      
+
       // Make a request to get the current user with the token
       const userResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8055'}/users/me`, {
         method: 'GET',
@@ -133,19 +133,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!userResponse.ok) {
         throw new Error('Failed to fetch user data after login');
       }
-      
+
       const userData = await userResponse.json();
-      
+
       if (!userData?.data) {
         throw new Error('Invalid user data received');
       }
-      
+
       const user = userData.data;
-      
+
       // Set the user data directly from the login response
       setUser({
         id: user.id,
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         last_name: user.last_name || '',
         avatar: user.avatar || null
       });
-      
+
       console.log('User data set from login response');
       return true;
     } catch (error) {
@@ -170,11 +170,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Clear the token from local storage
       localStorage.removeItem('directus_token');
-      
+
       // Clear the token from the Directus client
       // @ts-ignore - Directus types don't include the setToken method
       await directus.setToken(null);
-      
+
       console.log('Logout successful');
     } catch (error) {
       console.error('Logout error:', error);
