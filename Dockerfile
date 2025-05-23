@@ -45,7 +45,7 @@ COPY . .
 
 # Set environment variables
 ENV NODE_ENV=development
-ENV PORT=3000
+ENV PORT=8080
 ENV HOST=0.0.0.0
 ENV CHOKIDAR_USEPOLLING=true
 ENV WATCHPACK_POLLING=true
@@ -53,15 +53,15 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_PUBLIC_API_URL=http://directus:8055
 
-# Expose the application port
-EXPOSE 3000
+# Expose the application ports
+EXPOSE 3000 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
 
 # Start the development server
-CMD ["npm", "run", "dev", "--", "--port", "3000"]
+CMD ["npm", "run", "dev", "--", "--port", "8080"]
 
 # ---- Production Stage ----
 FROM base AS production
@@ -81,8 +81,8 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
 
-# Expose the application port
-EXPOSE 3000
+# Expose the application ports
+EXPOSE 3000 8080
 
 # Start the production server
 CMD ["npm", "start"]

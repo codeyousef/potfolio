@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { useAethelframeStore } from '../../store/useAethelframeStore';
 
-const Overture = () => {
+const Overture = memo(() => {
   const { hideOverture } = useAethelframeStore();
   const [showSkip, setShowSkip] = useState(false);
   const [hasVisited, setHasVisited] = useState(false);
@@ -10,8 +10,13 @@ const Overture = () => {
   useEffect(() => {
     // Check if user has visited before
     const visited = localStorage.getItem('aethelframe_visited');
+    console.log('Overture: checking if user has visited before, aethelframe_visited =', visited);
+
     if (visited) {
+      console.log('Overture: user has visited before, setting hasVisited to true');
       setHasVisited(true);
+    } else {
+      console.log('Overture: user has not visited before');
     }
 
     // Show skip button after delay
@@ -23,7 +28,10 @@ const Overture = () => {
   }, []);
 
   const handleBegin = () => {
+    console.log('Overture: handleBegin called');
+    console.log('Overture: setting aethelframe_visited to true');
     localStorage.setItem('aethelframe_visited', 'true');
+    console.log('Overture: calling hideOverture()');
     hideOverture();
   };
 
@@ -85,11 +93,22 @@ const Overture = () => {
 
   // If user has visited before, skip overture automatically after a short delay
   useEffect(() => {
+    console.log('Overture: hasVisited useEffect triggered, hasVisited =', hasVisited);
+
     if (hasVisited) {
+      console.log('Overture: user has visited before, setting timer to hide overture');
+
       const timer = setTimeout(() => {
+        console.log('Overture: timer expired, calling hideOverture()');
         hideOverture();
       }, 500);
-      return () => clearTimeout(timer);
+
+      return () => {
+        console.log('Overture: cleaning up timer');
+        clearTimeout(timer);
+      };
+    } else {
+      console.log('Overture: user has not visited before, not hiding overture');
     }
   }, [hasVisited, hideOverture]);
 
@@ -175,6 +194,6 @@ const Overture = () => {
       )}
     </div>
   );
-};
+});
 
 export default Overture;

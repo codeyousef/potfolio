@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 import { useAethelframeStore } from '../../store/useAethelframeStore';
 
 interface KineticCanvasWrapperProps {
@@ -7,9 +7,9 @@ interface KineticCanvasWrapperProps {
   id: string;
 }
 
-const KineticCanvasWrapper = ({ children, id }: KineticCanvasWrapperProps) => {
+const KineticCanvasWrapper = memo(({ children, id }: KineticCanvasWrapperProps) => {
   const { currentPhase } = useAethelframeStore();
-  
+
   // Different transition settings based on the current phase
   const getTransition = () => {
     switch(currentPhase) {
@@ -23,7 +23,7 @@ const KineticCanvasWrapper = ({ children, id }: KineticCanvasWrapperProps) => {
         return { duration: 0.9, ease: [0.76, 0, 0.24, 1] };
     }
   };
-  
+
   const variants = {
     initial: {
       opacity: 0,
@@ -44,7 +44,7 @@ const KineticCanvasWrapper = ({ children, id }: KineticCanvasWrapperProps) => {
       translateZ: -50,
     }
   };
-  
+
   return (
     <motion.section
       className="kinetic-canvas perspective"
@@ -54,10 +54,11 @@ const KineticCanvasWrapper = ({ children, id }: KineticCanvasWrapperProps) => {
       exit="exit"
       transition={getTransition()}
       data-canvas-id={id}
+      layoutId={`canvas-${id}`}
     >
       {children}
     </motion.section>
   );
-};
+});
 
 export default KineticCanvasWrapper;

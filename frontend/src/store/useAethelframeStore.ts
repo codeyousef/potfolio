@@ -64,9 +64,9 @@ interface AethelframeState {
 
 export const useAethelframeStore = create<AethelframeState>((set, get) => ({
   // Initial state - Seed/Veil phase
-  currentPhase: 'seed',
-  activeCanvasId: 'home',
-  isOvertureVisible: true,
+  currentPhase: localStorage.getItem('aethelframe_phase') as EmergencePhase || 'seed',
+  activeCanvasId: localStorage.getItem('aethelframe_activeCanvas') as CanvasId || 'home',
+  isOvertureVisible: localStorage.getItem('aethelframe_visited') !== 'true',
   isCuratorMenuOpen: false,
 
   // Initial Directus data
@@ -102,14 +102,27 @@ export const useAethelframeStore = create<AethelframeState>((set, get) => ({
   },
 
   // Actions
-  setPhase: (phase) => set({ currentPhase: phase }),
+  setPhase: (phase) => {
+    localStorage.setItem('aethelframe_phase', phase);
+    set({ currentPhase: phase });
+  },
 
   setActiveCanvas: (id) => set((state) => {
     // Reset journal tag when navigating away from journal canvas
     const shouldResetJournalTag = state.activeCanvasId !== id && id !== 'journal';
 
+    // Log the current and new canvas IDs
+    console.log('setActiveCanvas called with id:', id);
+    console.log('Current activeCanvasId:', state.activeCanvasId);
+    console.log('Current phase:', state.currentPhase);
+
+    // Store the active canvas ID in localStorage
+    localStorage.setItem('aethelframe_activeCanvas', id);
+
     // When changing canvas in seed phase, transition to growth
     if (state.currentPhase === 'seed' && state.activeCanvasId !== id) {
+      console.log('Transitioning from seed to growth phase');
+      localStorage.setItem('aethelframe_phase', 'growth');
       return { 
         activeCanvasId: id, 
         currentPhase: 'growth',
@@ -119,6 +132,8 @@ export const useAethelframeStore = create<AethelframeState>((set, get) => ({
 
     // When in growth phase and user navigates to a second canvas, transition to bloom
     if (state.currentPhase === 'growth' && state.activeCanvasId !== id) {
+      console.log('Transitioning from growth to bloom phase');
+      localStorage.setItem('aethelframe_phase', 'bloom');
       return { 
         activeCanvasId: id, 
         currentPhase: 'bloom',
@@ -126,16 +141,36 @@ export const useAethelframeStore = create<AethelframeState>((set, get) => ({
       };
     }
 
+    console.log('No phase transition, just updating activeCanvasId');
     return { 
       activeCanvasId: id,
       ...(shouldResetJournalTag ? { currentJournalTag: null } : {})
     };
   }),
 
-  hideOverture: () => set({ 
-    isOvertureVisible: false,
-    currentPhase: 'growth' 
-  }),
+  hideOverture: () => {
+    console.log('hideOverture called');
+    console.log('Setting aethelframe_visited to true');
+    console.log('Setting aethelframe_phase to growth');
+
+    localStorage.setItem('aethelframe_visited', 'true');
+    localStorage.setItem('aethelframe_phase', 'growth');
+
+    // Get the current activeCanvasId from localStorage to preserve it
+    const storedCanvasId = localStorage.getItem('aethelframe_activeCanvas') as CanvasId;
+    const canvasId = storedCanvasId || 'home';
+
+    set({ 
+      isOvertureVisible: false,
+      currentPhase: 'growth',
+      // Preserve the activeCanvasId
+      activeCanvasId: canvasId
+    });
+
+    console.log('isOvertureVisible set to false');
+    console.log('currentPhase set to growth');
+    console.log('Preserving activeCanvasId as', canvasId);
+  },
 
   toggleCuratorMenu: () => set((state) => ({ 
     isCuratorMenuOpen: !state.isCuratorMenuOpen 

@@ -19,7 +19,14 @@ import AdminProjectNew from "./pages/admin/projects/new/page";
 import AdminSettings from "./pages/admin/settings/page";
 import LoginPage from "./pages/admin/login/page";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -40,71 +47,79 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/" element={<Index />} />
+const App = () => {
+  console.log('App: rendering');
 
-        {/* Project Detail Page */}
-        <Route path="/projects/:slug" element={<ProjectDetail />} />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/projects" element={<Index />} />
+          <Route path="/services" element={<Index />} />
+          <Route path="/journal" element={<Index />} />
+          <Route path="/contact" element={<Index />} />
 
-        {/* Service Detail Page */}
-        <Route path="/services/:slug" element={<ServiceDetail />} />
+          {/* Project Detail Page */}
+          <Route path="/projects/:slug" element={<ProjectDetail />} />
 
-        {/* Journal Entry Detail Page */}
-        <Route path="/journal/:slug" element={<JournalEntryDetail />} />
+          {/* Service Detail Page */}
+          <Route path="/services/:slug" element={<ServiceDetail />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminDashboard />
-            </AdminLayout>
-          </ProtectedRoute>
-        } />
+          {/* Journal Entry Detail Page */}
+          <Route path="/journal/:slug" element={<JournalEntryDetail />} />
 
-        <Route path="/admin/projects" element={
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminProjects />
-            </AdminLayout>
-          </ProtectedRoute>
-        } />
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/projects/new" element={
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminProjectNew />
-            </AdminLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/projects" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminProjects />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/projects/:id" element={
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminProjectEdit />
-            </AdminLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/projects/new" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminProjectNew />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/settings" element={
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminSettings />
-            </AdminLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/projects/:id" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminProjectEdit />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminSettings />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
 
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+          <Route path="/admin/login" element={<LoginPage />} />
+
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
