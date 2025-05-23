@@ -80,11 +80,21 @@ class JournalEntry(BaseModel):
         ('published', 'Published'),
         ('archived', 'Archived'),
     ]
+    
+    LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('ar', 'Arabic'),
+        ('both', 'Both'),
+    ]
 
     title = models.CharField(max_length=255)
+    title_ar = models.CharField(max_length=255, blank=True, null=True, help_text="Arabic title")
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     excerpt = models.TextField(blank=True, null=True)
+    excerpt_ar = models.TextField(blank=True, null=True, help_text="Arabic excerpt")
     content_rich_text = models.TextField(blank=True, null=True)
+    content_rich_text_ar = models.TextField(blank=True, null=True, help_text="Arabic content")
+    language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='en')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     publication_date = models.DateTimeField(blank=True, null=True)
     featured_image = models.ForeignKey(
@@ -95,6 +105,7 @@ class JournalEntry(BaseModel):
         related_name='journal_featured_images'
     )
     tags = models.JSONField(blank=True, null=True)
+    tags_ar = models.JSONField(blank=True, null=True, help_text="Arabic tags")
     sort = models.IntegerField(default=0)
 
     class Meta:
@@ -124,8 +135,10 @@ class Service(BaseModel):
     ]
 
     title = models.CharField(max_length=255)
+    title_ar = models.CharField(max_length=255, blank=True, null=True, help_text="Arabic title")
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     description_rich_text = models.TextField(blank=True, null=True)
+    description_rich_text_ar = models.TextField(blank=True, null=True, help_text="Arabic description")
     icon_svg = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     featured_image = models.ForeignKey(

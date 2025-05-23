@@ -25,7 +25,7 @@ FROM base AS builder
 WORKDIR /app
 
 # Copy app files
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/frontend/node_modules /app/frontend/node_modules
 COPY . .
 
 # Build the application
@@ -68,10 +68,9 @@ FROM base AS production
 WORKDIR /app/frontend
 
 # Copy built application from builder
-COPY --from=builder /app/frontend/.next ./.next
+COPY --from=builder /app/frontend/dist ./dist
 COPY --from=builder /app/frontend/public ./public
 COPY --from=builder /app/frontend/package.json ./
-COPY --from=builder /app/frontend/next.config.js ./
 
 # Install production dependencies
 RUN npm install --only=production
@@ -85,4 +84,4 @@ ENV HOST=0.0.0.0
 EXPOSE 3000 8080
 
 # Start the production server
-CMD ["npm", "start"]
+CMD ["npm", "run", "preview", "--", "--port", "3000", "--host"]

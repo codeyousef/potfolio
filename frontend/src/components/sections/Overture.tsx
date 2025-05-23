@@ -1,199 +1,171 @@
-import { motion } from 'framer-motion';
-import { useEffect, useState, memo } from 'react';
-import { useAethelframeStore } from '../../store/useAethelframeStore';
+import React, { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 
-const Overture = memo(() => {
-  const { hideOverture } = useAethelframeStore();
-  const [showSkip, setShowSkip] = useState(false);
-  const [hasVisited, setHasVisited] = useState(false);
+interface OvertureProps {
+  onComplete: () => void
+}
 
-  useEffect(() => {
-    // Check if user has visited before
-    const visited = localStorage.getItem('aethelframe_visited');
-    console.log('Overture: checking if user has visited before, aethelframe_visited =', visited);
-
-    if (visited) {
-      console.log('Overture: user has visited before, setting hasVisited to true');
-      setHasVisited(true);
-    } else {
-      console.log('Overture: user has not visited before');
+const Overture: React.FC<OvertureProps> = ({ onComplete }) => {
+  const [step, setStep] = useState(0)
+  const [autoProgress, setAutoProgress] = useState(true)
+  
+  // Text content for each step
+  const steps = [
+    {
+      title: "Welcome to Aethelframe Protocol",
+      subtitle: "A journey through digital craftsmanship",
+      description: "This portfolio represents an exploration of design, technology, and creative expression."
+    },
+    {
+      title: "The Emergence Theme",
+      subtitle: "Three phases of revelation",
+      description: "Experience the portfolio through the lens of emergence: Seed, Growth, and Bloom."
+    },
+    {
+      title: "Begin Your Journey",
+      subtitle: "Navigate through the experience",
+      description: "Explore projects, services, and thoughts as you move through the phases of emergence."
     }
-
-    // Show skip button after delay
+  ]
+  
+  // Auto-progress through steps
+  useEffect(() => {
+    if (!autoProgress) return
+    
     const timer = setTimeout(() => {
-      setShowSkip(true);
-    }, 3500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleBegin = () => {
-    console.log('Overture: handleBegin called');
-    console.log('Overture: setting aethelframe_visited to true');
-    localStorage.setItem('aethelframe_visited', 'true');
-    console.log('Overture: calling hideOverture()');
-    hideOverture();
-  };
-
-  // Variants for animations
-  const monolithVariants = {
-    initial: { 
-      scale: 0.9, 
-      opacity: 0 
-    },
-    animate: { 
-      scale: 1, 
-      opacity: 1,
-      transition: { 
-        duration: 1.5, 
-        ease: [0.76, 0, 0.24, 1]
-      } 
-    }
-  };
-
-  const titleVariants = {
-    initial: { 
-      y: 20, 
-      opacity: 0 
-    },
-    animate: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        duration: 1.2, 
-        ease: [0.76, 0, 0.24, 1],
-        delay: 0.8
-      } 
-    }
-  };
-
-  const promptVariants = {
-    initial: { 
-      y: 15, 
-      opacity: 0 
-    },
-    animate: { 
-      y: 0, 
-      opacity: 1,
-      transition: { 
-        duration: 1, 
-        ease: [0.76, 0, 0.24, 1],
-        delay: 1.5
-      } 
-    }
-  };
-
-  const skipVariants = {
-    initial: { opacity: 0 },
-    animate: { 
-      opacity: 1,
-      transition: { duration: 0.8 } 
-    }
-  };
-
-  // If user has visited before, skip overture automatically after a short delay
-  useEffect(() => {
-    console.log('Overture: hasVisited useEffect triggered, hasVisited =', hasVisited);
-
-    if (hasVisited) {
-      console.log('Overture: user has visited before, setting timer to hide overture');
-
-      const timer = setTimeout(() => {
-        console.log('Overture: timer expired, calling hideOverture()');
-        hideOverture();
-      }, 500);
-
-      return () => {
-        console.log('Overture: cleaning up timer');
-        clearTimeout(timer);
-      };
+      if (step < steps.length - 1) {
+        setStep(step + 1)
+      } else {
+        onComplete()
+      }
+    }, 4000)
+    
+    return () => clearTimeout(timer)
+  }, [step, autoProgress, steps.length, onComplete])
+  
+  // Handle manual navigation
+  const handleNext = () => {
+    setAutoProgress(false)
+    if (step < steps.length - 1) {
+      setStep(step + 1)
     } else {
-      console.log('Overture: user has not visited before, not hiding overture');
+      onComplete()
     }
-  }, [hasVisited, hideOverture]);
-
-  if (hasVisited) {
-    return (
-      <motion.div
-        className="fixed inset-0 flex items-center justify-center bg-dark-bg z-50"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="text-center">
-          <motion.h1
-            className="text-4xl md:text-5xl font-montserrat font-light tracking-wider text-highlight-color"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            AETHELFRAME
-          </motion.h1>
-        </div>
-      </motion.div>
-    );
   }
-
+  
+  const handleSkip = () => {
+    setAutoProgress(false)
+    onComplete()
+  }
+  
+  // Animation variants
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 1.5, ease: 'easeInOut' } },
+    exit: { opacity: 0, transition: { duration: 0.8, ease: 'easeInOut' } }
+  }
+  
+  const textVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        duration: 0.8, 
+        ease: 'easeOut',
+        staggerChildren: 0.2
+      } 
+    },
+    exit: { 
+      opacity: 0, 
+      y: -20, 
+      transition: { 
+        duration: 0.5, 
+        ease: 'easeIn' 
+      } 
+    }
+  }
+  
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-dark-bg z-50">
-      <div className="noise-overlay"></div>
-
-      <motion.div 
-        className="w-24 h-48 md:w-36 md:h-72 bg-highlight-color/10 border border-highlight-color/20 mb-8"
-        variants={monolithVariants}
-        initial="initial"
-        animate="animate"
-      />
-
-      <motion.h1 
-        className="text-4xl md:text-5xl font-montserrat font-light tracking-wider text-highlight-color mb-10"
-        variants={titleVariants}
-        initial="initial"
-        animate="animate"
-      >
-        AETHELFRAME
-      </motion.h1>
-
-      <motion.div
-        variants={promptVariants}
-        initial="initial"
-        animate="animate"
-      >
-        <motion.button
-          className="begin-prompt"
-          onClick={handleBegin}
-          whileHover={{ 
-            letterSpacing: "0.2em",
-            textShadow: "0 0 8px rgba(226, 200, 160, 0.7)" 
-          }}
-          animate={{
-            scale: [1, 1.02, 1],
-          }}
-          transition={{
-            scale: {
-              repeat: Infinity,
-              repeatType: "mirror",
-              duration: 2,
-              ease: "easeInOut"
-            }
-          }}
-        >
-          [ BEGIN ]
-        </motion.button>
-      </motion.div>
-
-      {showSkip && (
-        <motion.button
-          className="absolute bottom-8 text-xs text-foreground/40 hover:text-foreground/70 transition-colors"
-          onClick={handleBegin}
-          variants={skipVariants}
+    <motion.div 
+      className="overture phase-seed fixed inset-0 flex items-center justify-center bg-deep-black"
+      variants={containerVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-20">
+          <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-teal-accent/10 blur-3xl"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-1/3 h-1/3 rounded-full bg-navy-accent/10 blur-3xl"></div>
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-6 z-10">
+        <motion.div 
+          className="max-w-2xl mx-auto text-center"
+          variants={textVariants}
           initial="initial"
           animate="animate"
+          exit="exit"
+          key={step}
         >
-          Skip Overture
-        </motion.button>
-      )}
-    </div>
-  );
-});
+          <motion.h1 
+            className="text-h2 md:text-h1 font-secondary font-bold mb-4"
+            variants={textVariants}
+          >
+            <span className="accent">{steps[step].title}</span>
+          </motion.h1>
+          
+          <motion.h2 
+            className="text-h4 md:text-h3 font-secondary font-medium mb-6"
+            variants={textVariants}
+          >
+            {steps[step].subtitle}
+          </motion.h2>
+          
+          <motion.p 
+            className="text-body mb-12"
+            variants={textVariants}
+          >
+            {steps[step].description}
+          </motion.p>
+          
+          <motion.div 
+            className="flex flex-col md:flex-row items-center justify-center gap-4"
+            variants={textVariants}
+          >
+            <button 
+              onClick={handleNext}
+              className="px-8 py-3 bg-teal-accent text-white rounded-full text-small uppercase tracking-wider transition-all hover:bg-teal-accent/90"
+            >
+              {step < steps.length - 1 ? 'Continue' : 'Enter'}
+            </button>
+            
+            {step < steps.length - 1 && (
+              <button 
+                onClick={handleSkip}
+                className="px-8 py-3 border border-gray-700 rounded-full text-small uppercase tracking-wider transition-all hover:border-teal-accent/50"
+              >
+                Skip Introduction
+              </button>
+            )}
+          </motion.div>
+        </motion.div>
+        
+        {/* Progress indicators */}
+        <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-2">
+          {steps.map((_, i) => (
+            <div 
+              key={i} 
+              className={`w-2 h-2 rounded-full ${i === step ? 'bg-teal-accent' : 'bg-gray-700'}`}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
 
-export default Overture;
+export default Overture

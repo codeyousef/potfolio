@@ -44,8 +44,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
         status = self.request.query_params.get('status')
         tech_stack = self.request.query_params.get('tech_stack')
         tag = self.request.query_params.get('tag')
+        category = self.request.query_params.get('category')
 
-        print("get_queryset called with status:", status, "tech_stack:", tech_stack, "and tag:", tag)
+        print("get_queryset called with status:", status, "tech_stack:", tech_stack, "tag:", tag, "category:", category)
         print("Initial queryset count:", queryset.count())
 
         if status:
@@ -61,6 +62,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
             # Filter by tag (JSONField contains)
             queryset = queryset.filter(tags__contains=[tag])
             print("After tag filter, queryset count:", queryset.count())
+
+        if category:
+            # Filter by category
+            queryset = queryset.filter(category__icontains=category)
+            print("After category filter, queryset count:", queryset.count())
 
         return queryset
 

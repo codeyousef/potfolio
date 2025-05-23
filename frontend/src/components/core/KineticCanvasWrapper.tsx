@@ -1,64 +1,67 @@
-import { motion } from 'framer-motion';
-import { ReactNode, memo } from 'react';
-import { useAethelframeStore } from '../../store/useAethelframeStore';
+import React, { ReactNode } from 'react'
+import { motion } from 'framer-motion'
+import { useAethelframeStore } from '@store/useAethelframeStore'
 
 interface KineticCanvasWrapperProps {
-  children: ReactNode;
-  id: string;
+  children: ReactNode
 }
 
-const KineticCanvasWrapper = memo(({ children, id }: KineticCanvasWrapperProps) => {
-  const { currentPhase } = useAethelframeStore();
-
-  // Different transition settings based on the current phase
-  const getTransition = () => {
-    switch(currentPhase) {
-      case 'seed':
-        return { duration: 1.2, ease: [0.76, 0, 0.24, 1] };
-      case 'growth':
-        return { duration: 0.9, ease: [0.76, 0, 0.24, 1] };
-      case 'bloom':
-        return { duration: 0.7, ease: [0.76, 0, 0.24, 1] };
-      default:
-        return { duration: 0.9, ease: [0.76, 0, 0.24, 1] };
-    }
-  };
-
-  const variants = {
-    initial: {
-      opacity: 0,
-      scale: 0.98,
-      rotateY: 5,
-      translateZ: -50,
-    },
-    animate: {
+const KineticCanvasWrapper: React.FC<KineticCanvasWrapperProps> = ({ children }) => {
+  const { currentPhase } = useAethelframeStore()
+  
+  // Animation variants based on the current phase
+  const wrapperVariants = {
+    seed: {
       opacity: 1,
       scale: 1,
-      rotateY: 0,
-      translateZ: 0,
+      transition: { duration: 1.2, ease: 'easeInOut' }
     },
-    exit: {
-      opacity: 0,
-      scale: 0.98,
-      rotateY: -5,
-      translateZ: -50,
+    growth: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.8, ease: 'easeOut' }
+    },
+    bloom: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.6, ease: 'easeOut' }
     }
-  };
-
+  }
+  
   return (
-    <motion.section
-      className="kinetic-canvas perspective"
-      variants={variants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={getTransition()}
-      data-canvas-id={id}
-      layoutId={`canvas-${id}`}
+    <motion.div 
+      className={`kinetic-canvas-wrapper w-full h-full min-h-screen flex items-center justify-center`}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={wrapperVariants[currentPhase]}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.4 } }}
     >
+      {/* Phase-specific background elements */}
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        {currentPhase === 'seed' && (
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-teal-accent/5 blur-3xl"></div>
+          </div>
+        )}
+        
+        {currentPhase === 'growth' && (
+          <div className="absolute top-0 left-0 w-full h-full opacity-20">
+            <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-teal-accent/10 blur-3xl"></div>
+            <div className="absolute bottom-1/3 right-1/3 w-1/3 h-1/3 rounded-full bg-navy-accent/10 blur-3xl"></div>
+          </div>
+        )}
+        
+        {currentPhase === 'bloom' && (
+          <div className="absolute top-0 left-0 w-full h-full opacity-30">
+            <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-teal-accent/15 blur-3xl"></div>
+            <div className="absolute bottom-1/3 right-1/3 w-1/3 h-1/3 rounded-full bg-navy-accent/15 blur-3xl"></div>
+            <div className="absolute top-1/3 right-1/4 w-1/4 h-1/4 rounded-full bg-maroon-accent/10 blur-3xl"></div>
+          </div>
+        )}
+      </div>
+      
       {children}
-    </motion.section>
-  );
-});
+    </motion.div>
+  )
+}
 
-export default KineticCanvasWrapper;
+export default KineticCanvasWrapper

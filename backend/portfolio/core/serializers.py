@@ -52,8 +52,8 @@ class JournalEntryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntry
         fields = [
-            'id', 'title', 'slug', 'excerpt', 'status', 
-            'publication_date', 'featured_image', 'tags'
+            'id', 'title', 'title_ar', 'slug', 'excerpt', 'excerpt_ar', 'status', 
+            'publication_date', 'featured_image', 'tags', 'tags_ar', 'language'
         ]
 
 class ServiceListSerializer(serializers.ModelSerializer):
@@ -63,6 +63,6 @@ class ServiceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = [
-            'id', 'title', 'slug', 'description_rich_text', 'icon_svg', 
-            'status', 'featured_image'
+            'id', 'title', 'title_ar', 'slug', 'description_rich_text', 'description_rich_text_ar', 
+            'icon_svg', 'status', 'featured_image'
         ]

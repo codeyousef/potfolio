@@ -36,3 +36,7 @@ docker-volumes/
 .env.*
 /.env
 /frontend/app/contact/page.tsx.bak
+/CLAUDE.md
+/new design.html
+/.claude/
+/frontend/.vite/

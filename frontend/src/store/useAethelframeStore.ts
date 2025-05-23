@@ -1,362 +1,178 @@
-import { create } from 'zustand';
-import { getPublishedProjects, getPublishedJournalEntries, getPublishedServices } from '../lib/api';
-import type { DirectusProject, DirectusJournalEntry, DirectusService } from '../types/directus';
+import { create } from 'zustand'
+import { getPublishedProjects, getPublishedJournalEntries, getPublishedServices } from '@lib/api'
+import { Project, JournalEntry, Service, PaginationState } from '@types/models'
 
-export type EmergencePhase = 'seed' | 'growth' | 'bloom';
-export type CanvasId = 'home' | 'portfolio' | 'services' | 'journal' | 'contact';
+// Define the emergence phases and canvas IDs
+export type EmergencePhase = 'seed' | 'growth' | 'bloom'
+export type CanvasId = 'home' | 'portfolio' | 'services' | 'journal' | 'contact'
 
+// Define the store state
 interface AethelframeState {
   // Core state
-  currentPhase: EmergencePhase;
-  activeCanvasId: CanvasId;
-  isOvertureVisible: boolean;
-  isCuratorMenuOpen: boolean;
-
-  // Directus data
-  projects: DirectusProject[];
-  journalEntries: DirectusJournalEntry[];
-  services: DirectusService[];
-  currentJournalTag: string | null;
-  journalPagination: {
-    currentPage: number;
-    totalPages: number;
-    totalEntries: number;
-    hasNext: boolean;
-    hasPrevious: boolean;
-  };
-  currentProjectTechStack: string | null;
-  currentProjectTag: string | null;
-  projectPagination: {
-    currentPage: number;
-    totalPages: number;
-    totalEntries: number;
-    hasNext: boolean;
-    hasPrevious: boolean;
-  };
-  isLoading: {
-    projects: boolean;
-    journalEntries: boolean;
-    services: boolean;
-  };
-  error: {
-    projects: string | null;
-    journalEntries: string | null;
-    services: string | null;
-  };
-
+  currentPhase: EmergencePhase
+  activeCanvasId: CanvasId
+  isOvertureVisible: boolean
+  
+  // Content state
+  projects: Project[]
+  journalEntries: JournalEntry[]
+  services: Service[]
+  
+  // Pagination state
+  projectsPagination: PaginationState
+  journalPagination: PaginationState
+  
+  // Filter state
+  activeProjectTechFilter: string | null
+  activeProjectTagFilter: string | null
+  activeProjectCategoryFilter: string | null
+  activeJournalTagFilter: string | null
+  
   // Actions
-  setPhase: (phase: EmergencePhase) => void;
-  setActiveCanvas: (id: CanvasId) => void;
-  hideOverture: () => void;
-  toggleCuratorMenu: () => void;
-  closeCuratorMenu: () => void;
-
-  // Directus actions
-  fetchProjects: (tech_stack?: string, tag?: string, page?: number) => Promise<void>;
-  setProjectTechStack: (tech_stack: string | null) => void;
-  setProjectTag: (tag: string | null) => void;
-  setProjectPage: (page: number) => void;
-  fetchJournalEntries: (tag?: string, page?: number) => Promise<void>;
-  setJournalTag: (tag: string | null) => void;
-  setJournalPage: (page: number) => void;
-  fetchServices: () => Promise<void>;
+  setActiveCanvas: (id: CanvasId) => void
+  hideOverture: () => void
+  fetchProjects: (tech_stack?: string, tag?: string, category?: string, page?: number) => Promise<void>
+  setProjectCategoryFilter: (category: string | null) => void
+  fetchJournalEntries: (tag?: string, page?: number) => Promise<void>
+  fetchServices: () => Promise<void>
+  setProjectTechFilter: (tech: string | null) => void
+  setProjectTagFilter: (tag: string | null) => void
+  setJournalTagFilter: (tag: string | null) => void
 }
 
+// Create the store
 export const useAethelframeStore = create<AethelframeState>((set, get) => ({
-  // Initial state - Seed/Veil phase
-  currentPhase: localStorage.getItem('aethelframe_phase') as EmergencePhase || 'seed',
-  activeCanvasId: localStorage.getItem('aethelframe_activeCanvas') as CanvasId || 'home',
+  // Initial state
+  currentPhase: (localStorage.getItem('aethelframe_phase') as EmergencePhase) || 'seed',
+  activeCanvasId: (localStorage.getItem('aethelframe_activeCanvas') as CanvasId) || 'home',
   isOvertureVisible: localStorage.getItem('aethelframe_visited') !== 'true',
-  isCuratorMenuOpen: false,
-
-  // Initial Directus data
+  
+  // Initial content
   projects: [],
   journalEntries: [],
   services: [],
-  currentJournalTag: null,
+  
+  // Initial pagination
+  projectsPagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    hasNext: false,
+    hasPrevious: false,
+  },
   journalPagination: {
     currentPage: 1,
     totalPages: 1,
-    totalEntries: 0,
+    totalItems: 0,
     hasNext: false,
     hasPrevious: false,
   },
-  currentProjectTechStack: null,
-  currentProjectTag: null,
-  projectPagination: {
-    currentPage: 1,
-    totalPages: 1,
-    totalEntries: 0,
-    hasNext: false,
-    hasPrevious: false,
-  },
-  isLoading: {
-    projects: false,
-    journalEntries: false,
-    services: false,
-  },
-  error: {
-    projects: null,
-    journalEntries: null,
-    services: null,
-  },
-
+  
+  // Initial filter state
+  activeProjectTechFilter: null,
+  activeProjectTagFilter: null,
+  activeProjectCategoryFilter: null,
+  activeJournalTagFilter: null,
+  
   // Actions
-  setPhase: (phase) => {
-    localStorage.setItem('aethelframe_phase', phase);
-    set({ currentPhase: phase });
-  },
-
   setActiveCanvas: (id) => set((state) => {
-    // Reset journal tag when navigating away from journal canvas
-    const shouldResetJournalTag = state.activeCanvasId !== id && id !== 'journal';
-
-    // Log the current and new canvas IDs
-    console.log('setActiveCanvas called with id:', id);
-    console.log('Current activeCanvasId:', state.activeCanvasId);
-    console.log('Current phase:', state.currentPhase);
-
-    // Store the active canvas ID in localStorage
-    localStorage.setItem('aethelframe_activeCanvas', id);
-
-    // When changing canvas in seed phase, transition to growth
+    // Store in localStorage
+    localStorage.setItem('aethelframe_activeCanvas', id)
+    
+    // Phase transitions logic
     if (state.currentPhase === 'seed' && state.activeCanvasId !== id) {
-      console.log('Transitioning from seed to growth phase');
-      localStorage.setItem('aethelframe_phase', 'growth');
-      return { 
-        activeCanvasId: id, 
-        currentPhase: 'growth',
-        ...(shouldResetJournalTag ? { currentJournalTag: null } : {})
-      };
+      localStorage.setItem('aethelframe_phase', 'growth')
+      return { activeCanvasId: id, currentPhase: 'growth' }
     }
-
-    // When in growth phase and user navigates to a second canvas, transition to bloom
+    
     if (state.currentPhase === 'growth' && state.activeCanvasId !== id) {
-      console.log('Transitioning from growth to bloom phase');
-      localStorage.setItem('aethelframe_phase', 'bloom');
-      return { 
-        activeCanvasId: id, 
-        currentPhase: 'bloom',
-        ...(shouldResetJournalTag ? { currentJournalTag: null } : {})
-      };
+      localStorage.setItem('aethelframe_phase', 'bloom')
+      return { activeCanvasId: id, currentPhase: 'bloom' }
     }
-
-    console.log('No phase transition, just updating activeCanvasId');
-    return { 
-      activeCanvasId: id,
-      ...(shouldResetJournalTag ? { currentJournalTag: null } : {})
-    };
+    
+    return { activeCanvasId: id }
   }),
-
+  
   hideOverture: () => {
-    console.log('hideOverture called');
-    console.log('Setting aethelframe_visited to true');
-    console.log('Setting aethelframe_phase to growth');
-
-    localStorage.setItem('aethelframe_visited', 'true');
-    localStorage.setItem('aethelframe_phase', 'growth');
-
-    // Get the current activeCanvasId from localStorage to preserve it
-    const storedCanvasId = localStorage.getItem('aethelframe_activeCanvas') as CanvasId;
-    const canvasId = storedCanvasId || 'home';
-
-    set({ 
+    localStorage.setItem('aethelframe_visited', 'true')
+    localStorage.setItem('aethelframe_phase', 'growth')
+    
+    // Preserve the active canvas ID
+    const canvasId = localStorage.getItem('aethelframe_activeCanvas') as CanvasId || 'home'
+    
+    set({
       isOvertureVisible: false,
       currentPhase: 'growth',
-      // Preserve the activeCanvasId
       activeCanvasId: canvasId
-    });
-
-    console.log('isOvertureVisible set to false');
-    console.log('currentPhase set to growth');
-    console.log('Preserving activeCanvasId as', canvasId);
+    })
   },
-
-  toggleCuratorMenu: () => set((state) => ({ 
-    isCuratorMenuOpen: !state.isCuratorMenuOpen 
-  })),
-
-  closeCuratorMenu: () => set({ isCuratorMenuOpen: false }),
-
-  // Directus actions
-  setProjectTechStack: (tech_stack) => {
-    console.log('setProjectTechStack called with tech_stack:', tech_stack);
-    console.log('Current tech_stack before update:', get().currentProjectTechStack);
-
-    // Reset to page 1 when changing tech_stack
-    set({ 
-      currentProjectTechStack: tech_stack,
-      projectPagination: {
-        ...get().projectPagination,
-        currentPage: 1
-      }
-    });
-
-    console.log('Current tech_stack after update:', get().currentProjectTechStack);
-
-    // Always fetch projects when setting a tech_stack, even if it's the same as the current tech_stack
-    console.log('Fetching projects with tech_stack:', tech_stack);
-    get().fetchProjects(tech_stack, get().currentProjectTag, 1); // Reset to page 1
-  },
-
-  setProjectTag: (tag) => {
-    console.log('setProjectTag called with tag:', tag);
-    console.log('Current tag before update:', get().currentProjectTag);
-
-    // Reset to page 1 when changing tag
-    set({ 
-      currentProjectTag: tag,
-      projectPagination: {
-        ...get().projectPagination,
-        currentPage: 1
-      }
-    });
-
-    console.log('Current tag after update:', get().currentProjectTag);
-
-    // Always fetch projects when setting a tag, even if it's the same as the current tag
-    console.log('Fetching projects with tag:', tag);
-    get().fetchProjects(get().currentProjectTechStack, tag, 1); // Reset to page 1
-  },
-
-  setProjectPage: (page) => {
-    console.log('setProjectPage called with page:', page);
-    set((state) => ({
-      projectPagination: {
-        ...state.projectPagination,
-        currentPage: page
-      }
-    }));
-
-    // Fetch projects for the new page
-    get().fetchProjects(undefined, undefined, page);
-  },
-
-  fetchProjects: async (tech_stack, tag, page) => {
-    set((state) => ({
-      isLoading: { ...state.isLoading, projects: true },
-      error: { ...state.error, projects: null }
-    }));
-
-    // Use the provided tech_stack/tag/page or the current tech_stack/tag/page from state
-    const techStackToUse = tech_stack !== undefined ? tech_stack : get().currentProjectTechStack;
-    const tagToUse = tag !== undefined ? tag : get().currentProjectTag;
-    const pageToUse = page !== undefined ? page : get().projectPagination.currentPage;
-
+  
+  // API actions
+  fetchProjects: async (tech_stack, tag, category, page = 1) => {
     try {
-      const response = await getPublishedProjects(techStackToUse || undefined, tagToUse || undefined, pageToUse);
-
-      // Calculate total pages
-      const totalPages = Math.ceil(response.count / 6); // 6 is the page size
-
-      set({ 
+      const response = await getPublishedProjects(tech_stack, tag, category, page)
+      
+      set({
         projects: response.results,
-        projectPagination: {
-          currentPage: pageToUse,
-          totalPages,
-          totalEntries: response.count,
+        projectsPagination: {
+          currentPage: page,
+          totalPages: Math.ceil(response.count / 6), // Assuming page size is 6
+          totalItems: response.count,
           hasNext: response.next !== null,
-          hasPrevious: response.previous !== null
-        },
-        isLoading: { ...get().isLoading, projects: false }
-      });
+          hasPrevious: response.previous !== null,
+        }
+      })
     } catch (error) {
-      console.error('Error fetching projects:', error);
-      set({ 
-        error: { ...get().error, projects: 'Failed to load projects.' },
-        isLoading: { ...get().isLoading, projects: false }
-      });
+      console.error('Error fetching projects:', error)
     }
   },
-
-  setJournalTag: (tag) => {
-    console.log('setJournalTag called with tag:', tag);
-    console.log('Current tag before update:', get().currentJournalTag);
-
-    // Reset to page 1 when changing tags
-    set({ 
-      currentJournalTag: tag,
-      journalPagination: {
-        ...get().journalPagination,
-        currentPage: 1
-      }
-    });
-
-    console.log('Current tag after update:', get().currentJournalTag);
-
-    // Always fetch journal entries when setting a tag, even if it's the same as the current tag
-    // This ensures that clicking "All Posts" always refreshes the entries
-    console.log('Fetching journal entries with tag:', tag);
-    get().fetchJournalEntries(tag, 1); // Reset to page 1
-  },
-
-  setJournalPage: (page) => {
-    console.log('setJournalPage called with page:', page);
-    set((state) => ({
-      journalPagination: {
-        ...state.journalPagination,
-        currentPage: page
-      }
-    }));
-
-    // Fetch journal entries for the new page
-    get().fetchJournalEntries(undefined, page);
-  },
-
-  fetchJournalEntries: async (tag, page) => {
-    set((state) => ({
-      isLoading: { ...state.isLoading, journalEntries: true },
-      error: { ...state.error, journalEntries: null }
-    }));
-
-    // Use the provided tag/page or the current tag/page from state
-    const tagToUse = tag !== undefined ? tag : get().currentJournalTag;
-    const pageToUse = page !== undefined ? page : get().journalPagination.currentPage;
-
+  
+  fetchJournalEntries: async (tag, page = 1) => {
     try {
-      const response = await getPublishedJournalEntries(tagToUse || undefined, pageToUse);
-
-      // Calculate total pages
-      const totalPages = Math.ceil(response.count / 6); // 6 is the page size
-
-      set({ 
+      const response = await getPublishedJournalEntries(tag, page)
+      
+      set({
         journalEntries: response.results,
         journalPagination: {
-          currentPage: pageToUse,
-          totalPages,
-          totalEntries: response.count,
+          currentPage: page,
+          totalPages: Math.ceil(response.count / 6), // Assuming page size is 6
+          totalItems: response.count,
           hasNext: response.next !== null,
-          hasPrevious: response.previous !== null
-        },
-        isLoading: { ...get().isLoading, journalEntries: false }
-      });
+          hasPrevious: response.previous !== null,
+        }
+      })
     } catch (error) {
-      console.error('Error fetching journal entries:', error);
-      set({ 
-        error: { ...get().error, journalEntries: 'Failed to load journal entries.' },
-        isLoading: { ...get().isLoading, journalEntries: false }
-      });
+      console.error('Error fetching journal entries:', error)
     }
   },
-
+  
   fetchServices: async () => {
-    set((state) => ({
-      isLoading: { ...state.isLoading, services: true },
-      error: { ...state.error, services: null }
-    }));
-
     try {
-      const services = await getPublishedServices();
-      set({ 
-        services,
-        isLoading: { ...get().isLoading, services: false }
-      });
+      const services = await getPublishedServices()
+      set({ services })
     } catch (error) {
-      console.error('Error fetching services:', error);
-      set({ 
-        error: { ...get().error, services: 'Failed to load services.' },
-        isLoading: { ...get().isLoading, services: false }
-      });
+      console.error('Error fetching services:', error)
     }
   },
-}));
+  
+  // Filter actions
+  setProjectTechFilter: (tech) => {
+    set({ activeProjectTechFilter: tech })
+    get().fetchProjects(tech, get().activeProjectTagFilter, get().activeProjectCategoryFilter)
+  },
+  
+  setProjectTagFilter: (tag) => {
+    set({ activeProjectTagFilter: tag })
+    get().fetchProjects(get().activeProjectTechFilter, tag, get().activeProjectCategoryFilter)
+  },
+
+  setProjectCategoryFilter: (category) => {
+    set({ activeProjectCategoryFilter: category })
+    get().fetchProjects(get().activeProjectTechFilter, get().activeProjectTagFilter, category)
+  },
+  
+  setJournalTagFilter: (tag) => {
+    set({ activeJournalTagFilter: tag })
+    get().fetchJournalEntries(tag)
+  },
+}))
