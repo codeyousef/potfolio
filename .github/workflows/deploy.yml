@@ -1,0 +1,269 @@
+name: Deploy Full-Stack Portfolio to GCP
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: us-central1
+  GCP_ZONE: us-central1-a
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Run frontend linting
+      working-directory: ./frontend
+      run: npm run lint
+    
+    - name: Run frontend tests with coverage
+      working-directory: ./frontend
+      run: npm run test:coverage
+    
+    - name: Upload frontend coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./frontend/coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_portfolio
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: poetry install
+    
+    - name: Run Django tests with coverage
+      working-directory: ./backend
+      env:
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: test_portfolio
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        DJANGO_SECRET_KEY: test-secret-key
+        DJANGO_DEBUG: True
+      run: |
+        source .venv/bin/activate
+        pip install coverage
+        python manage.py migrate
+        coverage run --source='.' manage.py test
+        coverage xml
+        coverage report --fail-under=80
+    
+    - name: Upload backend coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+    
+    - name: Run security checks
+      working-directory: ./backend
+      run: |
+        source .venv/bin/activate
+        pip install safety bandit
+        safety check
+        bandit -r . -f json -o bandit-report.json || true
+    
+    - name: Run performance tests
+      working-directory: ./backend
+      env:
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: test_portfolio
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        DJANGO_SECRET_KEY: test-secret-key
+      run: |
+        source .venv/bin/activate
+        python manage.py test portfolio.core.test_enhanced.PerformanceTestCase
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' # Only run E2E on PRs to save resources
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install Playwright
+      run: |
+        npm install -g @playwright/test
+        npx playwright install
+    
+    - name: Start application for E2E tests
+      run: |
+        # Start the application in background
+        docker-compose up -d
+        # Wait for services to be ready
+        timeout 300 bash -c 'until curl -f http://localhost:3000; do sleep 5; done'
+    
+    - name: Run E2E tests
+      run: |
+        # Add your E2E test commands here
+        echo "E2E tests would run here"
+        # Example: npx playwright test
+    
+    - name: Stop application
+      if: always()
+      run: docker-compose down
+
+  deploy:
+    needs: [test-frontend, test-backend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+    
+    - name: Configure Docker for GCP
+      run: gcloud auth configure-docker
+    
+    - name: Create production environment file
+      run: |
+        cat << EOF > .env.prod
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+        DJANGO_DEBUG=False
+        DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}
+        VITE_API_URL=${{ secrets.VITE_API_URL }}
+        CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+        EOF
+    
+    - name: Build and push Docker images
+      run: |
+        # Build and push backend image
+        docker build -f backend/Dockerfile.prod -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-backend:${{ github.sha }} backend/
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-backend:${{ github.sha }}
+        
+        # Build and push frontend image
+        docker build --target production -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-frontend:${{ github.sha }} .
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-frontend:${{ github.sha }}
+    
+    - name: Deploy to Compute Engine
+      run: |
+        # Copy files to VM
+        gcloud compute scp .env.prod ${{ secrets.GCP_VM_NAME }}:~/portfolio/ --zone=${{ env.GCP_ZONE }}
+        gcloud compute scp docker-compose.prod.yml ${{ secrets.GCP_VM_NAME }}:~/portfolio/docker-compose.yml --zone=${{ env.GCP_ZONE }}
+        gcloud compute scp nginx.conf ${{ secrets.GCP_VM_NAME }}:~/portfolio/ --zone=${{ env.GCP_ZONE }}
+        
+        # Deploy on VM
+        gcloud compute ssh ${{ secrets.GCP_VM_NAME }} --zone=${{ env.GCP_ZONE }} --command="
+          cd ~/portfolio &&
+          docker-compose down &&
+          docker-compose pull &&
+          docker-compose up -d &&
+          docker system prune -f
+        "
+
+  # Alternative: Deploy to Cloud Run (Serverless)
+  deploy-cloud-run:
+    needs: [test-frontend, test-backend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && false  # Set to true to use Cloud Run instead
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+    
+    - name: Configure Docker for GCP
+      run: gcloud auth configure-docker
+    
+    - name: Build and push backend
+      run: |
+        docker build -f backend/Dockerfile.prod -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-backend:${{ github.sha }} backend/
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-backend:${{ github.sha }}
+    
+    - name: Deploy backend to Cloud Run
+      run: |
+        gcloud run deploy portfolio-backend \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-backend:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.GCP_REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars="DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" \
+          --set-env-vars="POSTGRES_HOST=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}" \
+          --set-env-vars="POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
+          --set-env-vars="POSTGRES_USER=${{ secrets.POSTGRES_USER }}" \
+          --set-env-vars="POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
+          --max-instances=10
+    
+    - name: Build and push frontend
+      run: |
+        docker build --target production -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-frontend:${{ github.sha }} .
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-frontend:${{ github.sha }}
+    
+    - name: Deploy frontend to Cloud Run
+      run: |
+        gcloud run deploy portfolio-frontend \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/portfolio-frontend:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.GCP_REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars="VITE_API_URL=${{ secrets.VITE_API_URL }}" \
+          --max-instances=10

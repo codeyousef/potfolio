@@ -35,8 +35,15 @@ docker-volumes/
 
 .env.*
 /.env
+.env.prod
 /frontend/app/contact/page.tsx.bak
 /CLAUDE.md
 /new design.html
 /.claude/
 /frontend/.vite/
+
+# GCP Deployment files
+key.json
+.secrets.txt
+*.pem
+*.key
