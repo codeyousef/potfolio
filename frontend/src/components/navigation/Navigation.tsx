@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAethelframeStore } from '@store/useAethelframeStore'
@@ -6,7 +6,33 @@ import { useAethelframeStore } from '@store/useAethelframeStore'
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { currentPhase, activeCanvasId, setActiveCanvas } = useAethelframeStore()
-  
+  const navRef = useRef<HTMLDivElement>(null)
+
+  // Add dynamic light reflection based on cursor position
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!navRef.current) return
+
+      const rect = navRef.current.getBoundingClientRect()
+      const x = ((e.clientX - rect.left) / rect.width) * 100
+      const y = ((e.clientY - rect.top) / rect.height) * 100
+
+      navRef.current.style.background = `
+        radial-gradient(circle at ${x}% ${y}%, 
+          rgba(255, 255, 255, 0.1) 0%, 
+          transparent 60%),
+        linear-gradient(135deg, var(--glass-teal) 0%, transparent 40%),
+        linear-gradient(225deg, var(--glass-maroon) 0%, transparent 40%),
+        radial-gradient(ellipse at top, var(--glass-navy), transparent 50%)
+      `
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [])
+
   // Navigation items
   const navItems = [
     { id: 'home', label: 'Home', path: '/' },
@@ -14,8 +40,9 @@ const Navigation: React.FC = () => {
     { id: 'services', label: 'Services', path: '/services' },
     { id: 'journal', label: 'Journal', path: '/journal' },
     { id: 'contact', label: 'Contact', path: '/contact' },
+    { id: 'liquid-glass', label: 'Liquid Glass UI', path: '/liquid-glass' },
   ]
-  
+
   // Animation variants based on the current phase
   const navVariants = {
     seed: {
@@ -34,7 +61,7 @@ const Navigation: React.FC = () => {
       transition: { duration: 0.6, ease: 'easeOut' }
     }
   }
-  
+
   // Item animation variants
   const itemVariants = {
     closed: { opacity: 0, y: -20 },
@@ -44,19 +71,19 @@ const Navigation: React.FC = () => {
       transition: { delay: i * 0.1, duration: 0.5 }
     })
   }
-  
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
-  
+
   return (
     <motion.nav 
+      ref={navRef}
       className={`
+        liquid-glass
         py-4 px-6 md:px-12 
-        backdrop-blur-md 
-        ${currentPhase === 'seed' ? 'bg-deep-black/70' : ''}
-        ${currentPhase === 'growth' ? 'bg-gray-900/80' : ''}
-        ${currentPhase === 'bloom' ? 'bg-gray-900/90' : ''}
+        border-b border-white/5
+        animate-[materialize_0.5s_ease-out_forwards]
       `}
       initial={{ opacity: 0, y: -20 }}
       animate={navVariants[currentPhase]}
@@ -66,16 +93,19 @@ const Navigation: React.FC = () => {
         <Link to="/" className="text-h5 font-secondary font-bold">
           <span className="accent">Aethelframe</span> Protocol
         </Link>
-        
+
         {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-8">
+        <div className="hidden md:flex space-x-6">
           {navItems.map((item, index) => (
             <Link
               key={item.id}
               to={item.path}
               className={`
                 text-small uppercase tracking-wider transition-all duration-300
-                ${activeCanvasId === item.id ? 'text-teal-accent font-medium' : 'hover:text-teal-accent/70'}
+                px-4 py-2 rounded-xl
+                ${activeCanvasId === item.id 
+                  ? 'text-white font-medium border border-teal-accent/40 shadow-[0_0_20px_rgba(56,178,172,0.3)]' 
+                  : 'hover:text-white hover:border-teal-accent/20 hover:shadow-[0_0_10px_rgba(56,178,172,0.1)]'}
               `}
               onClick={() => setActiveCanvas(item.id as any)}
             >
@@ -83,7 +113,7 @@ const Navigation: React.FC = () => {
             </Link>
           ))}
         </div>
-        
+
         {/* Mobile Menu Button */}
         <button 
           className="md:hidden text-gray-300 focus:outline-none"
@@ -101,11 +131,11 @@ const Navigation: React.FC = () => {
           )}
         </button>
       </div>
-      
+
       {/* Mobile Menu */}
       {isMenuOpen && (
         <motion.div 
-          className="md:hidden absolute top-full left-0 w-full bg-gray-900/95 backdrop-blur-md py-4"
+          className="md:hidden absolute top-full left-0 w-full liquid-glass py-4 mt-1 rounded-b-2xl"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
@@ -122,8 +152,11 @@ const Navigation: React.FC = () => {
                 <Link
                   to={item.path}
                   className={`
-                    block py-2 text-small uppercase tracking-wider transition-all duration-300
-                    ${activeCanvasId === item.id ? 'text-teal-accent font-medium' : 'hover:text-teal-accent/70'}
+                    block py-3 px-4 my-1 text-small uppercase tracking-wider transition-all duration-300
+                    rounded-xl
+                    ${activeCanvasId === item.id 
+                      ? 'text-white font-medium border border-teal-accent/40 shadow-[0_0_20px_rgba(56,178,172,0.3)]' 
+                      : 'hover:text-white hover:border-teal-accent/20 hover:shadow-[0_0_10px_rgba(56,178,172,0.1)]'}
                   `}
                   onClick={() => {
                     setActiveCanvas(item.id as any)

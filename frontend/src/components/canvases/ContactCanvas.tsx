@@ -32,37 +32,22 @@ const ContactCanvas: React.FC<ContactCanvasProps> = ({
   const { currentPhase } = useAethelframeStore()
   const t = useTranslations(language)
   
-  // Theme configuration
-  const currentTheme = isDarkTheme ? {
-    bg: 'bg-black',
-    bgSecondary: 'bg-gray-900',
-    bgTertiary: 'bg-gray-800',
+  // Aurora glass theme - dark glass styling for readability
+  const currentTheme = {
     text: 'text-white',
-    textSecondary: 'text-gray-300',
-    textMuted: 'text-gray-500',
-    border: 'border-gray-700',
+    textSecondary: 'text-gray-200',
+    textMuted: 'text-gray-300',
     accent: 'text-teal-400',
+    maroon: 'text-red-400',
+    navy: 'text-blue-400',
     accentBg: 'bg-teal-500',
     cardBg: 'bg-gray-900/80',
-    inputBg: 'bg-gray-800',
-    gradientStart: 'from-black',
-    gradientMid: 'via-gray-900',
-    gradientEnd: 'to-black'
-  } : {
-    bg: 'bg-white',
-    bgSecondary: 'bg-gray-100',
-    bgTertiary: 'bg-gray-200',
-    text: 'text-gray-900',
-    textSecondary: 'text-gray-600',
-    textMuted: 'text-gray-400',
-    border: 'border-gray-300',
-    accent: 'text-teal-600',
-    accentBg: 'bg-teal-500',
-    cardBg: 'bg-white/80',
-    inputBg: 'bg-white',
-    gradientStart: 'from-white',
-    gradientMid: 'via-gray-50',
-    gradientEnd: 'to-white'
+    inputBg: 'bg-gray-800/90',
+    border: 'border-gray-600/50',
+    bgTertiary: 'bg-gray-800/60',
+    gradientStart: '',
+    gradientMid: '',
+    gradientEnd: ''
   }
 
   const scrollToSection = (sectionId: string) => {
@@ -96,7 +81,7 @@ const ContactCanvas: React.FC<ContactCanvasProps> = ({
   )
 
   return (
-    <section className={`h-screen pt-32 pb-16 relative bg-gradient-to-b ${currentTheme.gradientMid} ${currentTheme.gradientEnd} ${currentTheme.gradientStart} snap-start flex flex-col justify-center`} dir={language === 'ar' ? 'rtl' : 'ltr'}>          
+    <section className="h-screen pt-32 pb-16 relative snap-start flex flex-col justify-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>          
       <div className="container mx-auto px-8 relative z-10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
