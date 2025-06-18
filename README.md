@@ -102,7 +102,7 @@ This setup allows you to easily start the development environment or run tests a
 
 5. Access the applications:
    - Frontend: http://localhost:3000
-   - Django Admin: http://localhost:8000/admin
+   - Django Admin: http://localhost:8001/admin
 
 ## Testing
 
@@ -135,7 +135,7 @@ docker build -t portfolio-backend ./backend --target production
 docker build -t portfolio-frontend . --target production
 
 # Run the containers
-docker run -d -p 8000:8000 portfolio-backend
+docker run -d -p 8001:8001 portfolio-backend
 docker run -d -p 3000:3000 portfolio-frontend
 ```
 
@@ -143,7 +143,7 @@ docker run -d -p 3000:3000 portfolio-frontend
 
 The project uses Django Admin for content management:
 
-1. Access the Django admin panel at http://localhost:8000/admin
+1. Access the Django admin panel at http://localhost:8001/admin
 2. Log in with the admin credentials (default: admin/admin)
 3. Manage content through the admin interface
 4. The frontend will automatically fetch and display this content via the API

@@ -1,324 +1,557 @@
-# Creating a plasma-like liquid light waterfall effect for the web
+# VIRAL PORTFOLIO DESIGN: "DIGITAL CHAOS ENGINE"
 
-Achieving a continuous plasma waterfall effect that flows into a glass hero section with realistic light interactions while maintaining 60fps on mobile devices requires careful orchestration of WebGL shaders, performance optimizations, and progressive enhancement strategies.
+## Concept: "Break the Internet, Not Just the Grid"
 
-## Shader implementation for plasma effects
+This isn't a portfolio - it's a digital experience that makes visitors question reality. Inspired by actual award-winning sites like Studio Null's "gravity-defying" interface and Eduard Bodak's "structured chaos," this design weaponizes confusion into engagement.
 
-The foundation of this effect lies in combining **fluid dynamics simulation** with **glass material rendering**. For the plasma waterfall, there are three primary approaches: grid-based Eulerian methods using Navier-Stokes equations, particle-based Lagrangian methods using SPH (Smoothed Particle Hydrodynamics), or hybrid approaches like MLS-MPM that achieve 100,000+ particles in real-time.
+## Core Viral Mechanics
 
-The most practical implementation uses a combination of mathematical plasma functions with particle systems. Here's a core plasma shader:
+### The "WTF" Moment (First 3 Seconds)
+Users land on what appears to be a broken website - glitching text, a massive 3D head that follows their cursor with uncanny valley precision, and navigation that's scattered like a explosion across the screen. But as they move their mouse, everything responds with liquid-smooth physics, revealing this is intentional mastery, not chaos.
 
-```glsl
-// Vertex shader for waterfall flow
-attribute vec3 position;
-attribute vec2 uv;
-uniform float time;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-varying vec2 vUv;
-varying vec3 vWorldPosition;
+## Visual Design System
 
-void main() {
-    vec3 pos = position;
-    // Add waterfall flow distortion
-    pos.x += sin(pos.y * 10.0 + time * 5.0) * 0.02;
-    pos.z += cos(pos.y * 8.0 + time * 3.0) * 0.01;
-    
-    vec4 worldPosition = modelViewMatrix * vec4(pos, 1.0);
-    vWorldPosition = worldPosition.xyz;
-    vUv = uv;
-    gl_Position = projectionMatrix * worldPosition;
-}
-
-// Fragment shader for plasma effect
-precision mediump float;
-uniform float time;
-uniform vec2 resolution;
-varying vec2 vUv;
-
-float plasma(vec2 pos, float t) {
-    float value = 0.0;
-    value += sin(distance(pos * 0.4 + t, vec2(0.5, 0.9)) * 0.01);
-    value += sin(distance(pos, vec2(0.2, 0.7)) * 0.01);
-    value += sin(distance(pos * 0.3 + t, vec2(0.8, 0.2)) * 0.01);
-    return sin(value);
-}
-
-vec3 plasmaColor(float plasma_value) {
-    float r = 0.5 + 0.5 * sin(plasma_value + 0.0);
-    float g = 0.5 + 0.5 * sin(plasma_value + 2.094);
-    float b = 0.5 + 0.5 * sin(plasma_value + 4.188);
-    return vec3(r, g, b);
-}
-
-void main() {
-    vec2 uv = vUv;
-    // Add vertical flow bias
-    uv.y += time * 0.2;
-    
-    float plasmaValue = plasma(uv, time);
-    vec3 color = plasmaColor(plasmaValue);
-    
-    // Add glow effect
-    float glow = 1.0 / (1.0 + distance(uv, vec2(0.5, 0.5)) * 0.1);
-    color *= glow;
-    
-    gl_FragColor = vec4(color, 1.0);
-}
-```
-
-## Glass material with dynamic light interactions
-
-For the glass hero section container, implementing realistic refraction, reflection, and caustics requires careful consideration of Fresnel equations and physically-based rendering principles. The key is using **Schlick's approximation** for Fresnel calculations combined with environment mapping:
-
-```glsl
-// Glass fragment shader with Fresnel
-uniform samplerCube envMap;
-uniform float ior; // Index of refraction (1.5 for glass)
-varying vec3 vNormal;
-varying vec3 vEyeVector;
-
-float schlickFresnel(vec3 eyeVector, vec3 normal, float ior) {
-    float R0 = pow((1.0 - ior) / (1.0 + ior), 2.0);
-    float cosTheta = max(0.0, dot(-eyeVector, normal));
-    return R0 + (1.0 - R0) * pow(1.0 - cosTheta, 5.0);
-}
-
-void main() {
-    vec3 normal = normalize(vNormal);
-    
-    // Calculate Fresnel factor
-    float fresnel = schlickFresnel(vEyeVector, normal, ior);
-    
-    // Reflection
-    vec3 reflected = reflect(vEyeVector, normal);
-    vec3 reflectedColor = textureCube(envMap, reflected).rgb;
-    
-    // Refraction
-    vec3 refracted = refract(vEyeVector, normal, 1.0/ior);
-    vec3 refractedColor = textureCube(envMap, refracted).rgb;
-    
-    // Combine with Fresnel
-    vec3 finalColor = mix(refractedColor, reflectedColor, fresnel);
-    
-    gl_FragColor = vec4(finalColor, 1.0);
-}
-```
-
-For **real-time caustics**, the most efficient method is backward ray tracing from the floor surface:
-
-```glsl
-// Caustics calculation (Evan Wallace method)
-vec3 oldPos = position;
-vec3 newPos = position + refract(lightDir, normal, 1.0/1.33);
-
-vec2 oldArea = vec2(dFdx(oldPos.xy), dFdy(oldPos.xy));
-vec2 newArea = vec2(dFdx(newPos.xy), dFdy(newPos.xy));
-float intensity = length(oldArea) / length(newArea);
-intensity = clamp(intensity, 0.0, 1.0);
-```
-
-## Mobile-first performance optimization
-
-Achieving 60fps on mobile devices requires a multi-faceted optimization approach. Research shows that **draw calls are the primary bottleneck** on mobile WebGL, with each state change causing significant CPU-GPU synchronization overhead.
-
-### Critical optimization strategies
-
-**1. Reduce draw calls to under 20 per frame**
-- Use geometry instancing with `ANGLE_instanced_arrays` extension
-- Batch multiple plasma elements into single VBOs
-- Implement texture atlasing to minimize texture binding state changes
-
-**2. Mobile-specific shader optimizations**
-```glsl
-// Use appropriate precision for mobile
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-
-// Minimize texture lookups (keep under 21 calls)
-// Move calculations to vertex shader when possible
-```
-
-**3. Adaptive quality system**
-```javascript
-class AdaptiveQualityManager {
-    constructor() {
-        this.frameTimeBuffer = new Array(3).fill(16.67);
-        this.qualityLevel = this.detectDeviceCapabilities();
-    }
-    
-    update(deltaTime) {
-        this.frameTimeBuffer.shift();
-        this.frameTimeBuffer.push(deltaTime);
-        const avgFrameTime = this.frameTimeBuffer.reduce((a,b) => a+b) / 3;
-        
-        if (avgFrameTime > 20) { // Below 50fps
-            this.reduceQuality();
-        } else if (avgFrameTime < 14 && this.qualityLevel < 3) {
-            this.increaseQuality();
-        }
-    }
-    
-    reduceQuality() {
-        switch(this.qualityLevel) {
-            case 3: // Ultra -> High
-                this.particleCount *= 0.7;
-                this.shaderComplexity = 'high';
-                break;
-            case 2: // High -> Medium
-                this.particleCount *= 0.5;
-                this.shaderComplexity = 'medium';
-                this.textureResolution /= 2;
-                break;
-            case 1: // Medium -> Low
-                this.enableFallback = true;
-                break;
-        }
-        this.qualityLevel--;
-    }
-}
-```
-
-**4. Memory management**
-- Implement per-pixel VRAM budget: `(max_VRAM / screen_pixels) = per_pixel_budget`
-- Typical mobile budget: 1-2MB per screen
-- Use compressed texture formats: `WEBGL_compressed_texture_etc` (Android) or `WEBGL_compressed_texture_pvrtc` (iOS)
-
-### Performance benchmarks
-
-Modern mobile devices (2020+) can handle:
-- **1000-5000 particles** at 60fps with proper optimization
-- **512x512 plasma textures** for optimal performance
-- **10-15 texture lookups** maximum in fragment shaders
-
-## Implementation with Three.js
-
-Three.js provides excellent abstractions for this effect. Use `MeshPhysicalMaterial` for the glass container:
-
-```javascript
-const glassMaterial = new THREE.MeshPhysicalMaterial({
-    metalness: 0,
-    roughness: 0.1,
-    transmission: 0.95,
-    thickness: 0.5,
-    ior: 1.5,
-    clearcoat: 1.0,
-    transparent: true,
-    opacity: 0.1
-});
-
-// For the plasma waterfall, combine particle system with custom shaders
-const plasmaGeometry = new THREE.BufferGeometry();
-const positions = new Float32Array(particleCount * 3);
-const velocities = new Float32Array(particleCount * 3);
-
-plasmaGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-plasmaGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
-
-const plasmaMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        time: { value: 0 },
-        resolution: { value: new THREE.Vector2() }
-    },
-    vertexShader: plasmaVertexShader,
-    fragmentShader: plasmaFragmentShader,
-    blending: THREE.AdditiveBlending,
-    transparent: true
-});
-```
-
-## Specialized libraries and production examples
-
-**WebGL-Fluid-Simulation** by PavelDoGreat provides a battle-tested foundation for fluid dynamics, implementing GPU-accelerated Navier-Stokes equations with mobile compatibility. For enhanced features, **webgl-fluid-enhanced** offers easy integration with customizable color palettes and bloom effects.
-
-Production examples like **Lumalabs.ai** demonstrate sophisticated fluid dynamics behind SVG masks, while **Toyota Crown's WebGL experience** showcases cross-platform compatibility. The **Make Me Pulse 2018 Wishes** site exemplifies advanced transmission effects with custom shaders.
-
-## Hero section integration architecture
-
-Implement a component-based architecture with progressive enhancement:
-
-```javascript
-class PlasmaWaterfallHero {
-    constructor(container, options = {}) {
-        this.container = container;
-        this.options = { 
-            particleCount: this.detectParticleCount(),
-            quality: 'auto',
-            fallbackMode: 'video',
-            ...options 
-        };
-        this.initialize();
-    }
-    
-    async initialize() {
-        if (this.detectWebGL()) {
-            const quality = this.detectQualityTier();
-            if (quality >= 2) {
-                await this.loadWebGLVersion();
-            } else {
-                this.loadSimplifiedWebGL();
-            }
-        } else {
-            this.loadFallback();
-        }
-    }
-    
-    detectQualityTier() {
-        const gpu = this.detectGPU();
-        const memory = performance.memory?.jsHeapSizeLimit || 0;
-        const cores = navigator.hardwareConcurrency || 2;
-        
-        if (gpu.tier >= 3 && memory > 4e9 && cores >= 8) return 3; // Ultra
-        if (gpu.tier >= 2 && memory > 2e9 && cores >= 4) return 2; // High
-        if (gpu.tier >= 1) return 1; // Medium
-        return 0; // Low - use fallback
-    }
-}
-```
-
-## Fallback strategies
-
-Implement a tiered fallback system:
-
-**Tier 1 - CSS Animation Fallback**
+### Color Philosophy: "Neon Brutalism"
 ```css
-.plasma-fallback {
-    background: linear-gradient(180deg, 
-        #0066ff 0%, 
-        #00ffff 50%, 
-        #ff00ff 100%);
-    animation: plasma-flow 10s ease-in-out infinite;
-    filter: blur(20px) contrast(1.5);
-}
-
-@keyframes plasma-flow {
-    0%, 100% { transform: translateY(0) scale(1.1); }
-    50% { transform: translateY(-20px) scale(1.2); }
+:root {
+  /* Screw subtlety - these colors SCREAM */
+  --violence-pink: #FF006E;
+  --toxic-green: #00F5FF;
+  --warning-yellow: #FFBE0B;
+  --void-black: #000000;
+  --ghost-white: #FFFFFF;
+  
+  /* Glitch effects */
+  --glitch-1: #00FFFF;
+  --glitch-2: #FF00FF;
+  --glitch-3: #FFFF00;
+  
+  /* Random color generator for dynamic sections */
+  --chaos-color: hsl(var(--random-hue), 100%, 50%);
 }
 ```
 
-**Tier 2 - Video Fallback**
-Pre-render the plasma effect as an MP4/WebM video loop with transparent background support for modern browsers.
+### Typography: "Schizophrenic Type System"
+```css
+/* Hero text - Custom distorted font */
+@font-face {
+  font-family: 'Distortion Sans';
+  src: url('/fonts/custom-distorted.woff2');
+}
 
-**Tier 3 - SVG Animation**
-Use SVG filters for intermediate quality:
-```svg
-<filter id="plasma">
-    <feTurbulence baseFrequency="0.02" numOctaves="3" seed="5"/>
-    <feColorMatrix values="0 0 0 0 0, 0 0 0 0 0, 0 0 0 0 0, 0 0 0 1 0"/>
-</filter>
+/* Body text - Extreme weight variations */
+--font-hero: 'Distortion Sans', sans-serif;
+--font-body: 'GT America Extended', sans-serif;
+--font-accent: 'Times New Roman', serif; /* Yes, really */
+
+/* Sizes that break conventions */
+--text-hero: clamp(8rem, 15vw, 20rem);      /* MASSIVE */
+--text-subhero: clamp(0.5rem, 1vw, 0.75rem); /* tiny contrast */
+--text-random: calc(1rem + var(--mouse-x) * 0.5rem); /* Mouse-reactive */
 ```
 
-## Best practices for production
+## Layout Architecture: "Organized Anarchy"
 
-1. **Profile first**: Establish baseline metrics before optimization
-2. **Implement intersection observers**: Pause animations when out of viewport
-3. **Use WebGL2 when available**: Better performance with compute shaders
-4. **Handle context loss gracefully**: Implement robust recovery mechanisms
-5. **Monitor thermal throttling**: Reduce quality on device overheating
-6. **Test across devices**: Maintain device lab with low-end to high-end phones
+### Navigation: "The Explosion"
+```jsx
+// Nav items are literally thrown across the screen
+const navItems = [
+  { 
+    label: 'WORK', 
+    position: { x: '10%', y: '15%' },
+    rotation: -23,
+    scale: 1.5,
+    physics: { mass: 2, tension: 180 }
+  },
+  { 
+    label: 'WHO?', 
+    position: { x: '85%', y: '8%' },
+    rotation: 47,
+    scale: 0.8,
+    physics: { mass: 0.5, tension: 300 }
+  },
+  { 
+    label: 'HIRE ME', 
+    position: { x: '73%', y: '82%' },
+    rotation: -134,
+    scale: 2.2,
+    physics: { mass: 3, tension: 100 },
+    glitchOnHover: true
+  },
+  { 
+    label: '???', 
+    position: { x: '45%', y: '92%' },
+    rotation: 90,
+    scale: 0.6,
+    physics: { mass: 1, tension: 500 }
+  }
+]
+```
 
-By following these implementation strategies and optimization techniques, you can create a stunning plasma waterfall effect that maintains 60fps across devices while gracefully degrading on lower-end hardware. The key is balancing visual fidelity with performance through adaptive quality systems and careful resource management.
+### Hero Section: "The Uncanny Valley"
+```jsx
+<section className="h-[200vh] relative">
+  {/* Giant 3D head that tracks cursor with delay */}
+  <Canvas className="fixed inset-0">
+    <BigHead 
+      eyeTracking={true}
+      mouthSync={true} // Syncs to music
+      distortOnScroll={true}
+    />
+  </Canvas>
+  
+  {/* Text that breaks apart on scroll */}
+  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+    <h1 className="text-hero font-hero" data-splitting>
+      I CREATE
+      <br />
+      <span className="glitch" data-text="EXPERIENCES">
+        EXPERIENCES
+      </span>
+      <br />
+      THAT HAUNT YOU
+    </h1>
+  </div>
+  
+  {/* Hidden message in source code -->
+  <!-- 
+    IF YOU'RE READING THIS, YOU'RE THE KIND OF PERSON I WANT TO WORK WITH.
+    EMAIL ME WITH THE SUBJECT "I FOUND IT" FOR A SURPRISE.
+  -->
+</section>
+```
+
+### Project Showcase: "The Vortex"
+```jsx
+// Projects arranged in a spiral that users scroll through
+<section className="h-[500vh] relative">
+  <div className="sticky top-0 h-screen">
+    {projects.map((project, i) => {
+      const angle = (i / projects.length) * Math.PI * 2
+      const radius = 40 + (scrollProgress * 20)
+      
+      return (
+        <ProjectCard
+          key={project.id}
+          style={{
+            position: 'absolute',
+            left: `${50 + Math.cos(angle) * radius}%`,
+            top: `${50 + Math.sin(angle) * radius}%`,
+            transform: `
+              translate(-50%, -50%) 
+              rotate(${angle * 180 / Math.PI}deg)
+              scale(${1 - Math.abs(i - currentIndex) * 0.2})
+            `,
+            zIndex: projects.length - Math.abs(i - currentIndex)
+          }}
+          onHover={() => createExplosion(project.id)}
+        />
+      )
+    })}
+  </div>
+</section>
+```
+
+## 3D Implementation: "Digital Sculptures"
+
+### The Big Head (Hero)
+```javascript
+const BigHead = () => {
+  const { camera, mouse } = useThree()
+  const headRef = useRef()
+  
+  // Uncanny valley material - too real but not real enough
+  const skinMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 },
+      mousePosition: { value: new THREE.Vector2() },
+      distortion: { value: 0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      uniform float time;
+      uniform float distortion;
+      
+      void main() {
+        vUv = uv;
+        vNormal = normal;
+        
+        vec3 pos = position;
+        
+        // Breathing effect
+        pos *= 1.0 + sin(time * 0.5) * 0.02;
+        
+        // Glitch distortion on scroll
+        if (distortion > 0.0) {
+          pos.x += sin(pos.y * 10.0 + time * 20.0) * distortion * 0.1;
+          pos.z += cos(pos.x * 10.0 + time * 20.0) * distortion * 0.1;
+        }
+        
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      uniform float time;
+      uniform vec2 mousePosition;
+      
+      void main() {
+        // Subsurface scattering approximation
+        vec3 skinColor = vec3(0.95, 0.8, 0.75);
+        float fresnel = pow(1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 1.5);
+        
+        // Animated veins
+        float veins = sin(vUv.x * 30.0 + time) * sin(vUv.y * 30.0 + time) * 0.05;
+        
+        vec3 color = skinColor + vec3(0.1, 0.0, 0.0) * veins;
+        color += vec3(0.3, 0.1, 0.1) * fresnel;
+        
+        // Eye follow effect
+        float eyeGlow = smoothstep(0.98, 1.0, dot(normalize(mousePosition), vNormal));
+        color += vec3(1.0, 0.0, 0.3) * eyeGlow;
+        
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `
+  })
+  
+  // Disturbing eye tracking
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+    
+    // Eyes follow mouse with creepy delay
+    const targetX = mouse.x * 0.3
+    const targetY = mouse.y * 0.3
+    
+    headRef.current.children[0].rotation.y = THREE.MathUtils.lerp(
+      headRef.current.children[0].rotation.y,
+      targetX,
+      0.02
+    )
+    
+    headRef.current.children[0].rotation.x = THREE.MathUtils.lerp(
+      headRef.current.children[0].rotation.x,
+      targetY,
+      0.02
+    )
+    
+    // Random eye twitches
+    if (Math.random() > 0.995) {
+      headRef.current.children[0].rotation.x += (Math.random() - 0.5) * 0.1
+    }
+  })
+  
+  return (
+    <group ref={headRef}>
+      <mesh>
+        <sphereGeometry args={[3, 64, 64]} />
+        {skinMaterial}
+      </mesh>
+      {/* Add eyes, mouth, etc. */}
+    </group>
+  )
+}
+```
+
+### Project Previews: "Living Thumbnails"
+```javascript
+// Each project card contains a mini 3D scene
+const ProjectPreview = ({ project }) => {
+  return (
+    <div className="relative group">
+      <Canvas className="absolute inset-0">
+        <ambientLight intensity={0.1} />
+        <pointLight 
+          position={[10, 10, 10]} 
+          intensity={1}
+          color={project.color}
+        />
+        
+        {/* Floating project elements */}
+        <Float
+          speed={2}
+          rotationIntensity={2}
+          floatIntensity={2}
+        >
+          <ProjectMesh project={project} />
+        </Float>
+        
+        {/* Particle explosion on hover */}
+        <Particles 
+          count={1000}
+          trigger={hovered}
+          color={project.color}
+        />
+      </Canvas>
+      
+      {/* Glitchy text overlay */}
+      <div className="absolute inset-0 flex items-end p-4">
+        <h3 className="text-2xl font-hero glitch-text">
+          {project.title}
+        </h3>
+      </div>
+    </div>
+  )
+}
+```
+
+## Interaction Design: "Controlled Chaos"
+
+### Cursor: "The Entity"
+```javascript
+// Custom cursor that has a mind of its own
+const ChaosoCursor = () => {
+  const [isStuck, setIsStuck] = useState(false)
+  const [personality, setPersonality] = useState('curious')
+  
+  // Cursor occasionally gets "stuck" on interesting elements
+  const handleMouseMove = (e) => {
+    if (!isStuck) {
+      // Normal following with physics
+      gsap.to('.cursor', {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.6,
+        ease: "elastic.out(1, 0.3)"
+      })
+    } else {
+      // Cursor fights against user movement
+      gsap.to('.cursor', {
+        x: e.clientX + (Math.random() - 0.5) * 100,
+        y: e.clientY + (Math.random() - 0.5) * 100,
+        duration: 1.2,
+        ease: "elastic.out(2, 0.5)"
+      })
+    }
+  }
+  
+  // Cursor changes shape based on what it's hovering
+  const shapes = {
+    default: 'circle',
+    link: 'square',
+    interactive: 'star',
+    danger: 'skull',
+    secret: '?'
+  }
+}
+```
+
+### Scroll Behavior: "The Rebellion"
+```javascript
+// Scroll sometimes goes backwards or speeds up randomly
+let scrollChaos = {
+  multiplier: 1,
+  direction: 1,
+  isGlitching: false
+}
+
+window.addEventListener('wheel', (e) => {
+  e.preventDefault()
+  
+  // 5% chance of chaos
+  if (Math.random() > 0.95 && !scrollChaos.isGlitching) {
+    scrollChaos.isGlitching = true
+    scrollChaos.direction = Math.random() > 0.5 ? -1 : 3
+    
+    setTimeout(() => {
+      scrollChaos.isGlitching = false
+      scrollChaos.direction = 1
+    }, 500)
+  }
+  
+  window.scrollBy({
+    top: e.deltaY * scrollChaos.direction * scrollChaos.multiplier,
+    behavior: scrollChaos.isGlitching ? 'auto' : 'smooth'
+  })
+})
+```
+
+### Secret Interactions
+```javascript
+// Konami code unlocks "normal" portfolio
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
+let konamiIndex = 0
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++
+    if (konamiIndex === konamiCode.length) {
+      activateBoring Mode()
+    }
+  } else {
+    konamiIndex = 0
+  }
+})
+
+// Clicking the logo 7 times reveals actual contact info
+let logoClicks = 0
+logo.addEventListener('click', () => {
+  logoClicks++
+  if (logoClicks === 7) {
+    revealSecretContact()
+  }
+})
+
+// Idle too long? Site starts moving on its own
+let idleTimer = setTimeout(() => {
+  activateAutoPilot()
+}, 30000)
+```
+
+## Content Strategy: "Aggressive Honesty"
+
+### Project Descriptions
+```
+PROJECT: CORPORATE REBRAND
+"They wanted 'innovative but safe.' I gave them 'safe but looks innovative.' 
+They loved it. I died inside. 
++47% engagement though."
+
+PROJECT: EXPERIMENTAL APP
+"I spent 3 months building this. 7 people used it. 
+Those 7 people said it changed their lives. 
+Worth it? You tell me."
+
+PROJECT: E-COMMERCE SITE  
+"Turns out, people just want to buy things easily. 
+Revolutionary, I know. 
+Made it fast. Made it work. Client happy. Bank account happy."
+```
+
+### About Section: "Too Much Information"
+```
+"I'm a developer who thinks design school dropouts have the right idea.
+
+I build websites that make people uncomfortable in the best way.
+
+My code is clean. My designs are not.
+
+I've won awards. I've lost clients. Sometimes for the same project.
+
+I believe the web is too boring and I'm doing my part to fix that.
+
+Currently accepting projects that scare me.
+
+P.S. I also do normal websites if you're into that sort of thing."
+```
+
+## Performance: "Chaos, But Make It Smooth"
+
+### Loading Strategy
+```javascript
+// Three-stage loading that's part of the experience
+const loadingStages = {
+  stage1: {
+    duration: 800,
+    content: "INITIALIZING CHAOS ENGINE...",
+    glitchLevel: 'high'
+  },
+  stage2: {
+    duration: 600,
+    content: "LOADING YOUR NIGHTMARES...",
+    glitchLevel: 'medium'
+  },
+  stage3: {
+    duration: 400,
+    content: "ALMOST THERE... OR ARE WE?",
+    glitchLevel: 'low'
+  }
+}
+
+// Progressive enhancement based on device
+if (gpu.tier < 2) {
+  // Mobile/low-end: Reduce particle counts, simplify shaders
+  config.particles = 100
+  config.shaderComplexity = 'basic'
+} else {
+  // High-end: Full chaos
+  config.particles = 10000
+  config.shaderComplexity = 'extreme'
+}
+```
+
+## The Viral Hooks
+
+### 1. The "Screenshot Trap"
+Every section is designed to create a "WTF is this?" screenshot moment:
+- Glitching typography that looks broken but isn't
+- 3D head making weird expressions
+- Navigation scattered like an explosion
+- Cursor doing unexpected things
+
+### 2. The "Show Your Friends" Moments
+- Secret messages hidden in source code
+- Konami code easter egg
+- Logo that fights back when clicked
+- Scroll that sometimes goes backwards
+
+### 3. The "Professional Plot Twist"
+Despite the chaos, the actual work showcased is top-tier, creating cognitive dissonance that makes people share: "Look at this insane portfolio, but their work is actually incredible"
+
+## Technical Stack
+
+### Core Dependencies
+```json
+{
+  "dependencies": {
+    "next": "14.2.0",
+    "three": "^0.161.0",
+    "@react-three/fiber": "^8.15.0",
+    "@react-three/drei": "^9.96.0",
+    "@react-three/postprocessing": "^2.15.0",
+    "gsap": "^3.12.5",
+    "framer-motion": "^11.0.0",
+    "splitting": "^1.0.6",
+    "simplex-noise": "^4.0.0"
+  }
+}
+```
+
+## Launch Strategy
+
+### Phase 1: "Soft Chaos" (Week 1)
+- 50% chaos level
+- Some normal navigation available
+- Escape hatches for confused users
+
+### Phase 2: "Full Chaos" (Week 2)
+- 100% chaos unleashed
+- Remove safety nets
+- Add more easter eggs
+
+### Phase 3: "Viral Documentation" (Week 3)
+- Release "How I Built This Monstrosity" blog post
+- Behind-the-scenes video
+- Open source some components
+
+## Metrics That Matter
+
+### Traditional Metrics (Who Cares?)
+- Bounce Rate: Probably high
+- Time on Site: Either 5 seconds or 50 minutes
+- Conversion: ¯\_(ツ)_/¯
+
+### Real Metrics
+- Screenshots shared: Target 1000+ in first week
+- "WTF is this" tweets: Target 100+
+- Reddit posts: Aim for r/webdev frontpage
+- Job inquiries from people who "get it": That's the real win
+
+## Warning Labels
+
+This portfolio will:
+- Not work in IE (obviously)
+- Confuse your parents
+- Potentially induce motion sickness
+- Definitely get you noticed
+- Possibly get you hired by someone cool
+- Definitely not get you hired by someone boring
+
+## Final Note
+
+This isn't just a portfolio. It's a statement: 
+"The web doesn't have to be boring. Hire me if you agree."
+
+Remember: Fortune favors the bold, and the internet rewards the weird.

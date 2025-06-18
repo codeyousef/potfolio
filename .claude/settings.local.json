@@ -17,7 +17,14 @@
       "Bash(docker logs:*)",
       "Bash(find:*)",
       "Bash(rm:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(mkdir:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)",
+      "Bash(touch:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
