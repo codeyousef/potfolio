@@ -1,0 +1,254 @@
+/* MONOLITH - Ultra-Premium Portfolio Design System */
+
+/* Import Fallback Font (Suisse International alternative) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500&display=swap');
+
+:root {
+  /* The Entire Palette */
+  --void: #000000;
+  --obsidian: #0A0A0A;
+  --graphite: #141414;
+  --smoke: #1F1F1F;
+  --ash: #2A2A2A;
+  --pearl: #FAFAFA;
+  
+  /* The Only Accent (Used Sparingly) */
+  --light: #FFFFFF;
+  --light-10: rgba(255, 255, 255, 0.1);
+  --light-20: rgba(255, 255, 255, 0.2);
+  --light-40: rgba(255, 255, 255, 0.4);
+  --light-60: rgba(255, 255, 255, 0.6);
+  --light-80: rgba(255, 255, 255, 0.8);
+  
+  /* Surfaces */
+  --surface-primary: var(--void);
+  --surface-elevated: var(--obsidian);
+  --surface-overlay: rgba(255, 255, 255, 0.03);
+  
+  /* Exact Type Scale - Based on Musical Intervals */
+  --text-10: 0.625rem;    /* 10px - Metadata */
+  --text-12: 0.75rem;     /* 12px - Captions */
+  --text-14: 0.875rem;    /* 14px - Body */
+  --text-16: 1rem;        /* 16px - Interface */
+  --text-20: 1.25rem;     /* 20px - Subheading */
+  --text-32: 2rem;        /* 32px - Heading */
+  --text-48: 3rem;        /* 48px - Display */
+  --text-80: 5rem;        /* 80px - Hero */
+  --text-120: 7.5rem;     /* 120px - Statement */
+
+  /* Font Weights - Only What's Necessary */
+  --weight-thin: 100;
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+
+  /* Letter Spacing - Precision Tracking */
+  --tracking-tight: -0.04em;
+  --tracking-normal: -0.02em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.08em;
+  
+  /* Spacing System - Sacred Geometry */
+  --space-0: 0;
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px */
+  --space-5: 2.5rem;   /* 40px */
+  --space-8: 4rem;     /* 64px */
+  --space-13: 6.5rem;  /* 104px */
+  --space-21: 10.5rem; /* 168px */
+  --space-34: 17rem;   /* 272px */
+}
+
+/* Base Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: var(--weight-light);
+  font-size: var(--text-16);
+  line-height: 1.6;
+  color: var(--light);
+  background: var(--void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--weight-thin);
+  letter-spacing: var(--tracking-tight);
+  line-height: 0.85;
+}
+
+/* Utility Classes */
+.text-10 { font-size: var(--text-10); }
+.text-12 { font-size: var(--text-12); }
+.text-14 { font-size: var(--text-14); }
+.text-16 { font-size: var(--text-16); }
+.text-20 { font-size: var(--text-20); }
+.text-32 { font-size: var(--text-32); }
+.text-48 { font-size: var(--text-48); }
+.text-80 { font-size: var(--text-80); }
+.text-120 { font-size: var(--text-120); }
+
+.font-thin { font-weight: var(--weight-thin); }
+.font-light { font-weight: var(--weight-light); }
+.font-regular { font-weight: var(--weight-regular); }
+.font-medium { font-weight: var(--weight-medium); }
+
+.tracking-tight { letter-spacing: var(--tracking-tight); }
+.tracking-normal { letter-spacing: var(--tracking-normal); }
+.tracking-wide { letter-spacing: var(--tracking-wide); }
+.tracking-wider { letter-spacing: var(--tracking-wider); }
+
+.text-light { color: var(--light); }
+.text-light-80 { color: var(--light-80); }
+.text-light-60 { color: var(--light-60); }
+.text-light-40 { color: var(--light-40); }
+.text-light-20 { color: var(--light-20); }
+
+.bg-void { background-color: var(--void); }
+.bg-obsidian { background-color: var(--obsidian); }
+.bg-graphite { background-color: var(--graphite); }
+
+/* Links - Subtle underline animation */
+.link {
+  position: relative;
+  color: var(--light-60);
+  text-decoration: none;
+  transition: color 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 0.5px;
+  background: var(--light-40);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.link:hover {
+  color: var(--light);
+}
+
+.link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Scrollbar - Minimal */
+::-webkit-scrollbar {
+  width: 2px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--light-20);
+}
+
+/* Selection */
+::selection {
+  background: var(--light-20);
+  color: var(--light);
+}
+
+/* Focus - Subtle */
+*:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--light-20);
+}
+
+/* Transitions */
+.transition-all {
+  transition: all 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Grid System */
+.container {
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3);
+}
+
+/* Responsive Typography */
+@media (max-width: 1200px) {
+  .container {
+    padding: 0 var(--space-5);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --text-80: 3.5rem;
+    --text-120: 5rem;
+    --text-48: 2.5rem;
+    --text-32: 1.8rem;
+    --space-34: 8rem;
+    --space-21: 6rem;
+  }
+  
+  .container {
+    padding: 0 var(--space-3);
+  }
+  
+  /* Mobile grid adjustments */
+  [style*="grid-template-columns: repeat(12, 1fr)"] {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-8) !important;
+  }
+  
+  [style*="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Mobile navigation */
+  [style*="gap: '48px'"] {
+    gap: 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --text-80: 2.5rem;
+    --text-120: 3.5rem;
+    --text-48: 2rem;
+    --text-32: 1.5rem;
+    --space-34: 5rem;
+    --space-21: 4rem;
+  }
+}
+
+/* Performance */
+.gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

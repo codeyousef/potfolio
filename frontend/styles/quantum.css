@@ -1,0 +1,367 @@
+/* Quantum Portfolio Theme */
+:root {
+  /* Reality States */
+  --reality-prime: #FF006E;      /* Hot pink - main timeline */
+  --reality-alpha: #00F5FF;      /* Cyan - alternate timeline */
+  --reality-beta: #FFE500;       /* Yellow - possibility space */
+  --reality-gamma: #A8FF00;      /* Lime - unstable timeline */
+  --reality-void: #000000;       /* Black - between realities */
+  
+  /* Quantum States */
+  --superposition: linear-gradient(45deg, #FF006E, #00F5FF, #FFE500);
+  --entangled: radial-gradient(circle, #A8FF00, #FF006E, #000000);
+  --collapsed: #FFFFFF;
+  
+  /* Probability Fields */
+  --probable: rgba(255, 255, 255, 0.8);
+  --possible: rgba(255, 255, 255, 0.4);
+  --unlikely: rgba(255, 255, 255, 0.1);
+  
+  /* Dynamic Variables */
+  --quantum-state: 0.5; /* 0 = collapsed, 1 = superposition */
+  --timeline-drift: 0;  /* Increases with user actions */
+  
+  /* Typography */
+  --font-timeline-a: 'Space Grotesk', 'Inter', sans-serif;
+  --font-timeline-b: 'Orbitron', 'Exo 2', sans-serif;
+  --font-timeline-c: 'Exo 2', 'Space Grotesk', sans-serif;
+  
+  /* Sizing */
+  --base-size: 1rem;
+  --variance: 0.5rem;
+}
+
+/* Quantum text with uncertainty */
+.quantum-text {
+  font-family: var(--font-timeline-a);
+  font-size: calc(
+    var(--base-size) + 
+    (var(--quantum-state) * var(--variance))
+  );
+  filter: blur(calc(var(--quantum-state) * 2px));
+  transition: all 0.3s ease;
+}
+
+.quantum-text:hover {
+  filter: blur(0);
+  --quantum-state: 0;
+}
+
+/* Reality shift animation */
+@keyframes reality-shift {
+  0%, 100% {
+    filter: hue-rotate(0deg) contrast(1) brightness(1);
+    transform: translateX(0);
+  }
+  25% {
+    filter: hue-rotate(90deg) contrast(1.5) brightness(1.2);
+    transform: translateX(-5px);
+  }
+  50% {
+    filter: hue-rotate(180deg) contrast(0.8) brightness(0.8);
+    transform: translateX(5px);
+  }
+  75% {
+    filter: hue-rotate(270deg) contrast(1.2) brightness(1.1);
+    transform: translateX(-3px);
+  }
+}
+
+/* Quantum cursor styles */
+.quantum-cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+}
+
+.quantum-cursor.primary {
+  background: var(--reality-prime);
+  box-shadow: 0 0 20px var(--reality-prime);
+}
+
+.quantum-cursor-echo {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+  animation: quantum-fade 1s ease-out forwards;
+}
+
+@keyframes quantum-fade {
+  from {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+/* Timeline navigation */
+.timeline-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: linear-gradient(to bottom, var(--reality-void) 0%, transparent 100%);
+  backdrop-filter: blur(10px);
+}
+
+.timeline-button {
+  position: relative;
+  padding: 1rem 2rem;
+  background: transparent;
+  border: 2px solid;
+  color: white;
+  font-family: var(--font-timeline-b);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.timeline-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--superposition);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-button:hover::before {
+  opacity: 0.3;
+}
+
+.timeline-button.locked {
+  animation: glitch-text 2s infinite;
+}
+
+@keyframes glitch-text {
+  0%, 100% {
+    text-shadow: 0 0 2px var(--reality-prime);
+    transform: translate(0);
+  }
+  20% {
+    text-shadow: -2px 0 var(--reality-alpha), 2px 0 var(--reality-beta);
+    transform: translate(2px, -1px);
+  }
+  40% {
+    text-shadow: 2px 0 var(--reality-gamma), -2px 0 var(--reality-prime);
+    transform: translate(-2px, 1px);
+  }
+  60% {
+    text-shadow: 0 0 5px var(--reality-void);
+    transform: translate(1px, 1px);
+  }
+}
+
+/* Superposition states */
+.superposition-container {
+  position: relative;
+  min-height: 400px;
+}
+
+.quantum-state {
+  position: absolute;
+  inset: 0;
+  padding: 2rem;
+  border: 2px solid;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  transition: all 0.5s ease;
+}
+
+.quantum-state.success {
+  border-color: var(--reality-prime);
+  transform: rotate(-2deg) scale(0.98);
+}
+
+.quantum-state.failure {
+  border-color: var(--reality-alpha);
+  transform: rotate(2deg) scale(0.96);
+}
+
+.quantum-state.pivot {
+  border-color: var(--reality-beta);
+  transform: rotate(0deg) scale(0.94);
+}
+
+.quantum-state.collapsed {
+  transform: rotate(0deg) scale(1);
+  z-index: 10;
+}
+
+/* Probability indicators */
+.probability-meter {
+  position: relative;
+  height: 4px;
+  background: var(--reality-void);
+  overflow: hidden;
+}
+
+.probability-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--superposition);
+  transition: width 0.3s ease;
+}
+
+/* Quantum ripple effect */
+@keyframes quantum-ripple {
+  from {
+    transform: scale(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.quantum-ripple {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid var(--reality-prime);
+  pointer-events: none;
+  animation: quantum-ripple 1s ease-out;
+}
+
+/* Reality glitch effect */
+.reality-glitch {
+  animation: reality-distort 0.3s ease-out;
+}
+
+@keyframes reality-distort {
+  0%, 100% {
+    transform: scale(1) skew(0deg);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: scale(1.02) skew(2deg);
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    transform: scale(0.98) skew(-2deg);
+    filter: hue-rotate(180deg);
+  }
+  75% {
+    transform: scale(1.01) skew(1deg);
+    filter: hue-rotate(270deg);
+  }
+}
+
+/* Observer effect notice */
+.observer-notice {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  opacity: 0.6;
+  font-family: var(--font-timeline-c);
+}
+
+/* Quantum field visualization */
+.quantum-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  background: 
+    radial-gradient(circle at 30% 50%, var(--reality-prime) 0%, transparent 50%),
+    radial-gradient(circle at 70% 50%, var(--reality-alpha) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, var(--reality-beta) 0%, transparent 50%);
+  filter: blur(40px);
+  animation: quantum-breathe 10s ease-in-out infinite;
+}
+
+@keyframes quantum-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+/* Hide default cursor */
+body.quantum-cursor-active {
+  cursor: none;
+}
+body.quantum-cursor-active * {
+  cursor: none !important;
+}
+
+/* Reality noise overlay */
+.reality-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(255, 255, 255, 0.03) 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(255, 255, 255, 0.03) 4px
+    );
+  animation: noise-shift 8s linear infinite;
+}
+
+@keyframes noise-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-5px, 5px); }
+  50% { transform: translate(5px, -5px); }
+  75% { transform: translate(-5px, -5px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Quantum biography glitch text */
+.glitch-text {
+  animation: glitch 0.2s ease-in-out;
+}
+
+@keyframes glitch {
+  0%, 100% {
+    transform: translateX(0);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: translateX(-2px);
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    transform: translateX(2px);
+    filter: hue-rotate(180deg);
+  }
+  75% {
+    transform: translateX(-1px);
+    filter: hue-rotate(270deg);
+  }
+}

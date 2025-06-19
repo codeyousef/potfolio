@@ -1,0 +1,161 @@
+/* Terminal/Matrix theme colors */
+:root {
+  /* Terminal Greens */
+  --matrix-green: #00FF41;
+  --phosphor-burn: #33FF00;
+  --terminal-dim: #008F11;
+  
+  /* Danger States */
+  --error-red: #FF0040;
+  --warning-amber: #FFAA00;
+  --critical-magenta: #FF00FF;
+  
+  /* System Colors */
+  --deep-void: #000000;
+  --carbon-black: #0A0A0A;
+  --static-white: #FFFFFF;
+  --ice-blue: #00D4FF;
+  
+  /* Glitch Palette */
+  --glitch-cyan: #00FFFF;
+  --glitch-yellow: #FFFF00;
+  --corrupt-purple: #9D00FF;
+  
+  /* Dynamic Variables */
+  --system-stress: 0;
+  --corruption-level: 0;
+  
+  /* Text sizing */
+  --text-hero: calc(4rem + var(--system-stress) * 2rem);
+  --text-body: calc(1rem + var(--corruption-level) * 0.2rem);
+  --text-terminal: 0.875rem;
+}
+
+/* Terminal shadow effect */
+.shadow-terminal {
+  box-shadow: 
+    0 0 20px rgba(0, 255, 65, 0.5),
+    inset 0 0 20px rgba(0, 255, 65, 0.1);
+}
+
+/* Virus trail */
+.virus-trail {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform-origin: left center;
+}
+
+/* Glitch animation */
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(90deg);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(180deg);
+  }
+  60% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(270deg);
+  }
+  80% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Scanlines */
+@keyframes scanlines {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Static noise */
+@keyframes staticNoise {
+  0%, 100% {
+    transform: translate(0);
+  }
+  10% {
+    transform: translate(-1%, -1%);
+  }
+  20% {
+    transform: translate(1%, 1%);
+  }
+  30% {
+    transform: translate(-1%, 1%);
+  }
+  40% {
+    transform: translate(1%, -1%);
+  }
+  50% {
+    transform: translate(-1%, 0);
+  }
+  60% {
+    transform: translate(1%, 0);
+  }
+  70% {
+    transform: translate(0, -1%);
+  }
+  80% {
+    transform: translate(0, 1%);
+  }
+  90% {
+    transform: translate(-1%, -1%);
+  }
+}
+
+/* Terminal cursor */
+.caret-matrix-green {
+  caret-color: var(--matrix-green);
+}
+
+/* Monospace text selection */
+::selection {
+  background-color: var(--matrix-green);
+  color: var(--deep-void);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: var(--deep-void);
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--carbon-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--terminal-dim);
+  border: 1px solid var(--matrix-green);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--matrix-green);
+}
+
+/* Ensure sections are properly stacked */
+section {
+  position: relative;
+}
+
+/* Matrix mode effect */
+.matrix-mode {
+  filter: hue-rotate(120deg) saturate(2) contrast(1.2);
+  animation: matrixMode 5s ease-in-out;
+}
+
+@keyframes matrixMode {
+  0%, 100% { filter: hue-rotate(120deg) saturate(2) contrast(1.2); }
+  50% { filter: hue-rotate(240deg) saturate(3) contrast(1.5); }
+}

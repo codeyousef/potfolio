@@ -1,0 +1,289 @@
+/* NEURAL INTERFACE THEME */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Primary Palette - Subtle but Powerful */
+  --neural-white: #FAFAFA;
+  --pure-black: #000000;
+  --deep-space: #050505;
+  --carbon: #0A0A0A;
+  
+  /* Accent Colors - Used Sparingly */
+  --ai-blue: #0EA5E9;      /* Primary accent */
+  --neural-purple: #8B5CF6; /* Secondary accent */
+  --data-green: #10B981;   /* Success states */
+  
+  /* Glass Morphism */
+  --glass-white: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  
+  /* Gradients - Subtle and Premium */
+  --gradient-primary: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  --gradient-radial: radial-gradient(circle at 30% 40%, #0EA5E9 0%, transparent 50%);
+
+  /* Typography Scale */
+  --text-xs: 0.75rem;    /* 12px - Metadata */
+  --text-sm: 0.875rem;   /* 14px - Body small */
+  --text-base: 1rem;     /* 16px - Body */
+  --text-lg: 1.125rem;   /* 18px - Body large */
+  --text-xl: 1.5rem;     /* 24px - Subheadings */
+  --text-2xl: 2rem;      /* 32px - Headings */
+  --text-3xl: 3rem;      /* 48px - Display */
+  --text-4xl: 4rem;      /* 64px - Hero */
+  --text-5xl: 6rem;      /* 96px - Statement */
+}
+
+/* Base Styles */
+body.neural-theme {
+  background: var(--deep-space);
+  color: var(--neural-white);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glass Panel Effect */
+.glass-panel {
+  background: var(--glass-white);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Neural Button */
+.neural-button {
+  position: relative;
+  padding: 12px 24px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neural-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.neural-button:hover::before {
+  transform: translateX(0);
+}
+
+.neural-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+}
+
+/* Glass Button Variant */
+.glass-button {
+  padding: 12px 24px;
+  background: var(--glass-white);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--neural-white);
+  font-weight: 400;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-button.primary {
+  background: var(--gradient-primary);
+  border: none;
+  font-weight: 500;
+}
+
+/* Typography */
+.neural-heading {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.neural-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--deep-space);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Selection */
+::selection {
+  background: rgba(14, 165, 233, 0.3);
+  color: white;
+}
+
+/* Focus States */
+*:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.5);
+}
+
+/* Particle Field Container */
+.particle-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Project Card Hover */
+.project-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+}
+
+/* Loading State */
+.neural-loader {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--glass-border);
+  border-top-color: var(--ai-blue);
+  border-radius: 50%;
+  animation: neural-spin 1s linear infinite;
+}
+
+@keyframes neural-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Cursor Trail Canvas */
+.cursor-trail {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Hide default cursor on neural interface */
+body.neural-theme.custom-cursor * {
+  cursor: none !important;
+}
+
+/* Neural Pulse Animation */
+@keyframes neural-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Glow Effect */
+.neural-glow {
+  filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.5));
+}
+
+/* Section Spacing */
+.neural-section {
+  padding: 8rem 0;
+  position: relative;
+}
+
+/* Max Width Container */
+.neural-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Grid System */
+.neural-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.neural-grid-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  :root {
+    --text-3xl: 2.5rem;
+    --text-4xl: 3rem;
+    --text-5xl: 4rem;
+  }
+  
+  .neural-section {
+    padding: 4rem 0;
+  }
+}
+
+/* Performance - GPU Acceleration */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
